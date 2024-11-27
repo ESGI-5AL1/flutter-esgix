@@ -1,3 +1,4 @@
+import 'package:esgix/shared/models/auth_result.dart';
 import 'package:esgix/shared/widgets/text_user_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

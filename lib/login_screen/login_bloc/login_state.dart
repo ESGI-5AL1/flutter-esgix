@@ -7,7 +7,22 @@ enum LoginStatus {
   error,
 }
 
-@immutable
-sealed class LoginState {}
+class LoginState {
+  final LoginStatus status;
+  final User user;
 
-final class LoginInitial extends LoginState {}
+  const LoginState({
+    this.status = LoginStatus.initial,
+    this.user = const User(username: "username", description: "description", id: "id", email: "email", avatar: "avatar"),
+  });
+
+  LoginState copyWith({
+    LoginStatus? status,
+    User? user,
+  }) {
+    return LoginState(
+      status: status ?? this.status,
+      user: user ?? this.user,
+    );
+  }
+}

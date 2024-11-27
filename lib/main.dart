@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
             create: (context) => LoginBloc(),
           )
         ],
-        child: const MyHomePage(title: 'Hello World!'),
+        child: const LoginScreen(),
       ),
     );
   }
