@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'counter/bloc_counter_bloc.dart';
 
 void main() {
   dotenv.load(fileName: ".env");
@@ -25,9 +24,6 @@ class MyApp extends StatelessWidget {
       ),
       home: MultiBlocProvider(
         providers: [
-          BlocProvider(
-            create: (context) => CounterBloc(),
-          ),
           BlocProvider(
             create: (context) => LoginBloc(),
           )
