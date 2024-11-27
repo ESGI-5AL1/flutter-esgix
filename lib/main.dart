@@ -1,9 +1,12 @@
+import 'package:esgix/login_screen/login_bloc/login_bloc.dart';
+import 'package:esgix/login_screen/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'counter/bloc_counter_bloc.dart';
 
 void main() {
+  dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
 
@@ -16,16 +19,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
       ),
       home: MultiBlocProvider(
         providers: [
           BlocProvider(
-            create: (context) => CounterBloc(),
-          ),
+            create: (context) => LoginBloc(),
+          )
         ],
-        child: const MyHomePage(title: 'Hello World!'),
+        child: const LoginScreen(),
       ),
     );
   }
