@@ -1,32 +1,38 @@
-import 'package:esgix/shared/widgets/post_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:esgix/shared/bloc/post_widget_bloc/post_widget_bloc.dart';
+import 'package:esgix/shared/bloc/post_widget_bloc/post_widget_event.dart';
+import 'package:esgix/shared/bloc/post_widget_bloc/post_widget_state.dart';
+import 'package:esgix/shared/widgets/post_widget.dart';  // Assuming you have PostWidget defined
 
-class feed_Screen extends StatelessWidget {
-  final List<PostWidget> posts = [
-    PostWidget(
-      username: "/bpkhalil",
-      title: "Syntax Verification",
-      content:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, Lorem Ipsum.",
-      likes: 69,
-      comments: 12,
-    ),
-    PostWidget(
-      username: "/flutterdev",
-      title: "New Flutter Update",
-      content:
-      "Flutter has introduced new features for better performance. Check out the new widgets and enhancements available in the latest version.",
-      likes: 120,
-      comments: 45,
-    ),
-  ];
-
+class FeedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // Dispatch FetchPosts event to load posts
+    context.read<PostBloc>().add(FetchPosts());
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Feed")),
-      body: ListView(
-        children: posts, // Utiliser la liste dynamique ici
+      appBar: AppBar(
+        title: Text('ESGIX'),
+      ),
+      body: BlocBuilder<PostBloc, PostState>(
+        builder: (context, state) {
+          if (state is PostLoading) {
+            return Center(child: CircularProgressIndicator());
+          } else if (state is PostLoaded) {
+            final posts = state.posts;
+            return ListView.builder(
+              itemCount: posts.length,
+              itemBuilder: (context, index) {
+                return PostWidget(post: posts[index]);
+              },
+            );
+          } else if (state is PostError) {
+            return Center(child: Text('Error: ${state.message}'));
+          } else {
+            return Center(child: Text('No posts available.'));
+          }
+        },
       ),
     );
   }

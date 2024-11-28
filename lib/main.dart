@@ -1,12 +1,14 @@
+import 'package:dio/dio.dart';
 import 'package:esgix/feed_screen/feed_screen.dart';
 import 'package:esgix/login_screen/login_bloc/login_bloc.dart';
 import 'package:esgix/login_screen/login_screen.dart';
+import 'package:esgix/shared/bloc/post_widget_bloc/post_widget_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
-  dotenv.load(fileName: ".env");
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
 
@@ -33,15 +35,18 @@ class MyApp extends StatelessWidget {
     );
   }*/
 
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false, // Désactiver le bandeau "Debug"
-      title: 'My App',
+      title: 'Flutter Feed App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: feed_Screen(), // Définir FeedScreen comme l'écran initial
+      // Provide PostBloc to the widget tree above the FeedScreen
+      home: BlocProvider(
+        create: (context) => PostBloc(dio: Dio()),  // Provide your PostBloc here
+        child: FeedScreen(),  // Your FeedScreen widget
+      ),
     );
   }
 }
