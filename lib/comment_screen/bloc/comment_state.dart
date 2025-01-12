@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:esgix/shared/models/PostResult.dart';
 
 
 import '../../shared/models/post.dart';
@@ -13,7 +14,7 @@ class CommentInitial extends CommentState {}
 class CommentLoading extends CommentState {}
 
 class CommentLoaded extends CommentState {
-  final List<Post> comments;
+  final List<PostResult> comments;
 
   CommentLoaded(this.comments);
 

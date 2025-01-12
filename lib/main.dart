@@ -1,6 +1,7 @@
 import 'package:esgix/comment_screen/comment_screen.dart';
 import 'package:esgix/login_screen/login_bloc/login_bloc.dart';
 import 'package:esgix/login_screen/login_screen.dart';
+import 'package:esgix/shared/models/PostResult.dart';
 import 'package:esgix/shared/models/post.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,12 +26,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    const fakePost = Post(
+    const fakePost = PostResult(
       id: '1',
       content: 'Picture Cropping\nLorem Ipsum is simply dummy text of the printing and typesetting industry.',
       imageUrl: '',
       parent: '',
       likes: 69,
+      commentsCount: 12,
+      authorUsername: 'Hubert',
+      authorAvatar: 'https://picsum.photos/200/300',
     );
 
 

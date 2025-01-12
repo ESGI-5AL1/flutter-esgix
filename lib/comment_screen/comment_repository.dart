@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../shared/models/post.dart';
+import '../shared/models/PostResult.dart';
+
 
 class CommentRepository {
   final String baseUrl;
   final String apiKey;
 
-  CommentRepository({required this.baseUrl, required this.apiKey}); // Utilisation de paramètres nommés
+  CommentRepository({required this.baseUrl, required this.apiKey});
 
-  Future<List<Post>> fetchComments(String postId) async {
+  Future<List<PostResult>> fetchComments(String postId) async {
     final response = await http.get(
       Uri.parse('$baseUrl/posts?parent=$postId'),
       headers: {
@@ -17,14 +18,14 @@ class CommentRepository {
     );
 
     if (response.statusCode == 200) {
-      final List data = json.decode(response.body);
-      return data.map((json) => Post.fromJson(json)).toList();
+      final List data = json.decode(response.body)['data'];
+      return data.map((json) => PostResult.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load comments');
     }
   }
 
-  Future<void> addComment(String postId, String content) async {
+  Future<void> addComment(String parentId, String content) async {
     final response = await http.post(
       Uri.parse('$baseUrl/posts'),
       headers: {
@@ -32,7 +33,7 @@ class CommentRepository {
         'x-api-key': apiKey,
       },
       body: json.encode({
-        'parent': postId,
+        'parent': parentId,
         'content': content,
       }),
     );
@@ -42,4 +43,17 @@ class CommentRepository {
     }
   }
 
+  Future<void> toggleLike(String postId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/posts/$postId/like'),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to toggle like');
+    }
+  }
 }
