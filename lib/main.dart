@@ -1,21 +1,39 @@
+import 'package:esgix/comment_screen/comment_screen.dart';
 import 'package:esgix/login_screen/login_bloc/login_bloc.dart';
 import 'package:esgix/login_screen/login_screen.dart';
+import 'package:esgix/shared/models/post.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart';
+
+import 'comment_screen/comment_repository.dart';
+import 'comment_screen/mockcomment-repository.dart';
 
 
 void main() {
   dotenv.load(fileName: ".env");
-  runApp(const MyApp());
+  final commentRepository = MockCommentRepository();
+
+  runApp(MyApp(commentRepository: commentRepository));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final CommentRepository commentRepository;
+  const MyApp({super.key, required this.commentRepository});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    const fakePost = Post(
+      id: '1',
+      content: 'Picture Cropping\nLorem Ipsum is simply dummy text of the printing and typesetting industry.',
+      imageUrl: '',
+      parent: '',
+      likes: 69,
+    );
+
+
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -28,7 +46,7 @@ class MyApp extends StatelessWidget {
             create: (context) => LoginBloc(),
           )
         ],
-        child: const LoginScreen(),
+        child: CommentScreen(post: fakePost, commentRepository: commentRepository ),
       ),
     );
   }
