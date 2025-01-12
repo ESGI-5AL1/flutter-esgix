@@ -6,40 +6,45 @@ import 'package:meta/meta.dart';
 
 import '../../shared/models/user.dart';
 
-part 'login_event.dart';
+part 'register_event.dart';
 
-part 'login_state.dart';
+part 'register_state.dart';
 
-class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginBloc() : super(const LoginState()) {
-    on<ExecuteLogin>((event, emit) async {
-      emit(state.copyWith(status: LoginStatus.loading));
-
-      final email = event.email;
-      final password = event.password;
-
+class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
+  RegisterBloc() : super(const RegisterState()) {
+    on<ExecuteRegister>((event, emit) async {
       try {
-        final authResult = await _login(email, password);
-        final token = authResult.token;
+        final authResult = await _register(
+          event.email,
+          event.password,
+          event.username,
+          event.avatar,
+        );
+
         final user = authResult.user;
+        final token = authResult.token;
         print("[TOKEN] : $token");
 
         emit(state.copyWith(
-            user: user,
-            status: LoginStatus.success
+          user: user,
+          status: RegisterStatus.success,
         ));
-
       } catch (error) {
         print("[ERROR] : $error");
         emit(state.copyWith(
-          status: LoginStatus.error,
+          status: RegisterStatus.error,
         ));
       }
     });
   }
 }
 
-Future<AuthResult> _login(String email, String password) async {
+Future<AuthResult> _register(
+  String email,
+  String password,
+  String username,
+  String avatar,
+) async {
   final String? token = dotenv.env['API_KEY'];
 
   if (token == null) {
@@ -52,8 +57,13 @@ Future<AuthResult> _login(String email, String password) async {
         'x-api-key': token,
         'Content-Type': 'application/json',
       }),
-      "https://esgix.tech/auth/login",
-      data: {'email': email, 'password': password},
+      "https://esgix.tech/auth/register",
+      data: {
+        'email': email,
+        'password': password,
+        'username': username,
+        'avatar': avatar,
+      },
     );
 
     print('Response: ${response.data}');
@@ -61,7 +71,7 @@ Future<AuthResult> _login(String email, String password) async {
     final data = response.data;
 
     if (data == null || data is! Map<String, dynamic>) {
-      print('Invalid or mmissing response data: $data');
+      print('Invalid or missing response data: $data');
       return const AuthResult(
         user: User(
           username: "",
@@ -103,16 +113,6 @@ Future<AuthResult> _login(String email, String password) async {
     } else {
       print('[ERROR]: $e');
     }
+    throw e;
   }
-
-  return const AuthResult(
-    user: User(
-      username: "",
-      description: "",
-      id: "0",
-      email: "",
-      avatar: "",
-    ),
-    token: "",
-  );
 }
