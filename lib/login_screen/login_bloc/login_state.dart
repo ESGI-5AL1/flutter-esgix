@@ -13,7 +13,12 @@ class LoginState {
 
   const LoginState({
     this.status = LoginStatus.initial,
-    this.user = const User(username: "username", description: "description", id: "id", email: "email", avatar: "avatar"),
+    this.user = const User(
+        username: "username",
+        description: "description",
+        id: "id",
+        email: "email",
+        avatar: "avatar"),
   });
 
   LoginState copyWith({

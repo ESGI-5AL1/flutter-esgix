@@ -1,7 +1,7 @@
-import 'package:esgix/shared/models/auth_result.dart';
 import 'package:esgix/shared/widgets/text_user_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import 'login_bloc/login_bloc.dart';
 
@@ -56,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             TextUserInput(
                               controller: _emailController,
                               elementWidthFactor: elementWidthFactor,
-                              hintText: 'username',
+                              hintText: 'email',
                               prefixIcon: const Icon(Icons.person),
                               isPassword: false,
                             ),
@@ -82,6 +82,21 @@ class _LoginScreenState extends State<LoginScreen> {
                                   },
                                   child: const Text(
                                     'Login',
+                                    style: TextStyle(color: Colors.blue),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            FractionallySizedBox(
+                              widthFactor: elementWidthFactor,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 10.0),
+                                child: TextButton(
+                                  onPressed: () {
+                                    context.go('/register');
+                                  },
+                                  child: const Text(
+                                    'Register',
                                     style: TextStyle(color: Colors.blue),
                                   ),
                                 ),

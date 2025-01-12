@@ -22,11 +22,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         final user = authResult.user;
         print("[TOKEN] : $token");
 
-        emit(state.copyWith(
-          user: user,
-          status: LoginStatus.success
-        ));
-
+        emit(state.copyWith(user: user, status: LoginStatus.success));
       } catch (error) {
         print("[ERROR] : $error");
         emit(state.copyWith(
@@ -39,6 +35,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
 Future<AuthResult> _login(String email, String password) async {
   final String? token = dotenv.env['API_KEY'];
+
+  if (token == null) {
+    throw Exception('API_KEY not loaded from .env');
+  }
 
   try {
     final response = await Dio().post(
@@ -91,7 +91,6 @@ Future<AuthResult> _login(String email, String password) async {
     print('Token: $authToken');
 
     return AuthResult(user: user, token: authToken);
-
   } catch (e) {
     if (e is DioException) {
       print('Dio: ${e.response?.statusCode} - ${e.response?.data}');
