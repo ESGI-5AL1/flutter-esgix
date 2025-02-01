@@ -9,6 +9,7 @@ class Post {
   final int likes;
   final int commentsCount;
   final Author author;  // Author object (or User if you prefer)
+  final bool likedByUser;
   final String createdAt;
   final String updatedAt;
 
@@ -20,6 +21,7 @@ class Post {
     required this.likes,
     required this.commentsCount,
     required this.author,
+    required this.likedByUser,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -33,6 +35,7 @@ class Post {
       likes: json['likesCount'] ?? 0,
       commentsCount: json['commentsCount'] ?? 0,
       author: Author.fromJson(json['author']),
+      likedByUser: json['likedByUser'] ?? false,
       createdAt: json['createdAt'] ?? '',
       updatedAt: json['updatedAt'] ?? '',
     );

@@ -20,7 +20,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
 
     try {
       final response = await dio.get(
-        'https://esgix.tech/posts?page=0&offset=10',
+        'https://esgix.tech/posts?page=0&offset=-1',
         options: Options(
           headers: {
             'x-api-key': token,
