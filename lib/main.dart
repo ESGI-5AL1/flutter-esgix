@@ -1,3 +1,4 @@
+import 'package:esgix/shared/bloc/user_bloc/user_bloc.dart';
 import 'package:esgix/shared/routing/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,8 +16,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => LoginBloc(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => UserBloc()),
+        BlocProvider(create: (context) => LoginBloc(userBloc: context.read<UserBloc>())),
+      ],
       child: MaterialApp.router(
         title: 'ESGIX',
         routerConfig: router,

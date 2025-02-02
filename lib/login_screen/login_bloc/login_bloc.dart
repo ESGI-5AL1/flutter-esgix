@@ -4,6 +4,7 @@ import 'package:esgix/shared/models/auth_result.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:meta/meta.dart';
 
+import '../../shared/bloc/user_bloc/user_bloc.dart';
 import '../../shared/models/user.dart';
 
 part 'login_event.dart';
@@ -11,7 +12,8 @@ part 'login_event.dart';
 part 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginBloc() : super(const LoginState()) {
+  final UserBloc userBloc;
+  LoginBloc({required this.userBloc}) : super(const LoginState()) {
     on<ExecuteLogin>((event, emit) async {
       emit(state.copyWith(status: LoginStatus.loading));
 
@@ -23,6 +25,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         final token = authResult.token;
         final user = authResult.user;
         print("[TOKEN] : $token");
+        print("User: ${user.username}, Email: ${user.email}, ID: ${user.id}, Avatar: ${user.avatar}");
+
+        userBloc.add(SetUser(user: user));
 
         emit(state.copyWith(
             user: user,

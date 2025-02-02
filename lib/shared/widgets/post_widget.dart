@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/post.dart';
 import '../bloc/post_widget_bloc/post_widget_bloc.dart';
 import '../bloc/post_widget_bloc/post_widget_state.dart';
-
+import '../bloc/user_bloc/user_bloc.dart';
+//@TODO : enlever tous les commentaire inutiles et les print mais faire la gestion.
 class PostWidget extends StatelessWidget {
   final Post post;
 
@@ -11,6 +12,8 @@ class PostWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userState = context.watch<UserBloc>().state;
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       decoration: BoxDecoration(
@@ -46,20 +49,21 @@ class PostWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-                // Menu contextuel (Edit/Delete)
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      print('Edit post ${post.id}');
-                    } else if (value == 'delete') {
-                      print('Delete post ${post.id}');
-                    }
-                  },
-                  itemBuilder: (BuildContext context) => [
-                    const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                    const PopupMenuItem(value: 'delete', child: Text('Delete')),
-                  ],
-                ),
+                // Menu contextuel (Edit/Delete) if user is the author
+                if (userState is UserLoaded && userState.user.id == post.author.id)
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        print('Edit post ${post.id}');
+                      } else if (value == 'delete') {
+                        print('Delete post ${post.id}');
+                      }
+                    },
+                    itemBuilder: (BuildContext context) => [
+                      const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                      const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                    ],
+                  ),
               ],
             ),
             const SizedBox(height: 8),
