@@ -1,10 +1,13 @@
+// File: `lib/shared/widgets/post_widget.dart`
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/post.dart';
 import '../bloc/post_widget_bloc/post_widget_bloc.dart';
 import '../bloc/post_widget_bloc/post_widget_state.dart';
 import '../bloc/user_bloc/user_bloc.dart';
-//@TODO : enlever tous les commentaire inutiles et les print mais faire la gestion.
+import 'package:go_router/go_router.dart';
+
 class PostWidget extends StatelessWidget {
   final Post post;
 
@@ -123,27 +126,7 @@ class PostWidget extends StatelessWidget {
                 // Gestion des commentaires
                 GestureDetector(
                   onTap: () {
-                    print('📌 Commentaires pour le post ${post.id}:');
-
-                    // Récupérer les commentaires directement depuis le BLoC
-                    final blocState = context.read<PostBloc>().state;
-                    if (blocState is PostLoaded) {
-
-                      List<Post> comments = blocState.posts
-                          .where((p) => p.parent == post.id)
-                          .toList();
-
-                      if (comments.isNotEmpty) {
-                        print('Nombre de commentaires: ${comments.length}');
-                        for (var comment in comments) {
-                          print('- ${comment.content} (Auteur: ${comment.author.username})');
-                        }
-                      } else {
-                        print('❌ Aucun commentaire pour ce post.');
-                      }
-                    } else {
-                      print('❌ Impossible de récupérer les commentaires.');
-                    }
+                    context.push('/post/${post.id}/comments');
                   },
                   child: Row(
                     children: [

@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../feed_screen/feed_screen.dart';
+import '../../post_comments_screen/post_comments_screen.dart';
 import '../bloc/post_widget_bloc/post_widget_bloc.dart';
 
 final router = GoRouter(
@@ -28,6 +29,16 @@ final router = GoRouter(
         create: (context) => PostBloc(dio: Dio()),
         child: const FeedScreen(),
       ),
+    ),
+    GoRoute(
+      path: '/post/:postId/comments',
+      builder: (context, state) {
+        final postId = state.pathParameters['postId']!;
+        return BlocProvider(
+          create: (context) => PostBloc(dio: Dio()),
+          child: PostCommentsScreen(postId: postId),
+        );
+      },
     ),
   ],
 );

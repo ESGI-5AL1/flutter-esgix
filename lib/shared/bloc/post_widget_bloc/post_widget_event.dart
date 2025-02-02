@@ -5,3 +5,9 @@ import 'package:flutter/material.dart';
 abstract class PostEvent {}
 
 class FetchPosts extends PostEvent {}
+
+class FetchComments extends PostEvent {
+  final String postId;
+
+  FetchComments({required this.postId});
+}
