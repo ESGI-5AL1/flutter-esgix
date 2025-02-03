@@ -63,14 +63,14 @@ class PostWidget extends StatelessWidget {
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: const Text('Delete Post'),
+                              title: const Text('Supprimer la publication'),
                               content: const Text(
-                                  'Are you sure you want to delete this post?'
+                                  'Vous confirmez la suppression?'
                               ),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
-                                  child: const Text('Cancel'),
+                                  child: const Text('Annuler'),
                                 ),
                                 TextButton(
                                   onPressed: () {
@@ -78,7 +78,7 @@ class PostWidget extends StatelessWidget {
                                     Navigator.pop(context);
                                   },
                                   child: const Text(
-                                    'Delete',
+                                    'Supprimer',
                                     style: TextStyle(color: Colors.red),
                                   ),
                                 ),

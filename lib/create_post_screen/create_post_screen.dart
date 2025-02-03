@@ -50,7 +50,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 controller: _contentController,
                 maxLines: 5,
                 decoration: const InputDecoration(
-                  hintText: 'What\'s on your mind?',
+                  hintText: '...',
                   border: OutlineInputBorder(),
                 ),
               ),

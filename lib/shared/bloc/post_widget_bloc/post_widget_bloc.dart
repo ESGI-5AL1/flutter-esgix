@@ -89,7 +89,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
         ),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final newPost = Post.fromJson(response.data);
         add(AddNewPost(newPost));
       } else {
