@@ -3,7 +3,7 @@ class Author {
   final String username;
   final String avatar;
 
-  const Author({
+  Author({
     required this.id,
     required this.username,
     required this.avatar,
@@ -11,9 +11,9 @@ class Author {
 
   factory Author.fromJson(Map<String, dynamic> json) {
     return Author(
-      id: json['id'] ?? '',
-      username: json['username'] ?? '',
-      avatar: json['avatar'] ?? '',
+      id: json['id'],
+      username: json['username'],
+      avatar: json['avatar'],
     );
   }
 }

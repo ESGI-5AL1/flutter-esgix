@@ -1,33 +1,20 @@
 part of 'login_bloc.dart';
 
-enum LoginStatus {
-  initial,
-  loading,
-  success,
-  error,
+abstract class LoginState {}
+
+class LoginInitial extends LoginState {}
+
+class LoginLoading extends LoginState {}
+
+class LoginSuccess extends LoginState {
+  final String token;
+
+  LoginSuccess({required this.token});
 }
 
-class LoginState {
-  final LoginStatus status;
-  final User user;
+class LoginFailure extends LoginState {
+  final String error;
 
-  const LoginState({
-    this.status = LoginStatus.initial,
-    this.user = const User(
-        username: "username",
-        description: "description",
-        id: "id",
-        email: "email",
-        avatar: "avatar"),
-  });
-
-  LoginState copyWith({
-    LoginStatus? status,
-    User? user,
-  }) {
-    return LoginState(
-      status: status ?? this.status,
-      user: user ?? this.user,
-    );
-  }
+  LoginFailure(this.error);
 }
+

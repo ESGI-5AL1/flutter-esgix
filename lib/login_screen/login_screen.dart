@@ -1,7 +1,7 @@
-import 'package:esgix/shared/widgets/text_user_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../shared/widgets/text_user_input.dart';
 import 'login_bloc/login_bloc.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -12,8 +12,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   @override
   void dispose() {
@@ -25,112 +25,118 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocConsumer<LoginBloc, LoginState>(
+      body: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
-          if (state.status == LoginStatus.success) {
+          if (state is LoginSuccess) {
             context.go('/feed');
-          } else if (state.status == LoginStatus.error) {
+          } else if (state is LoginFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Login failed. Please try again.'),
+              SnackBar(
+                content: Text(state.error),
                 backgroundColor: Colors.red,
               ),
             );
           }
         },
-        builder: (context, state) {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              double padding = constraints.maxWidth * 0.1;
-              double elementWidthFactor =
-                  constraints.maxWidth > 600 ? 0.5 : 0.8;
-              return Column(
-                children: [
-                  const Flexible(
-                    flex: 1,
-                    child: Center(
-                      child: Text(
-                        'ESGIX',
-                        style: TextStyle(fontSize: 52, color: Colors.blue),
-                      ),
-                    ),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Logo or Title
+                const Text(
+                  'ESGIX',
+                  style: TextStyle(
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
                   ),
-                  Flexible(
-                    flex: 3,
-                    child: Container(
-                      padding: EdgeInsets.all(padding),
-                      child: Center(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            TextUserInput(
-                              controller: _emailController,
-                              elementWidthFactor: elementWidthFactor,
-                              hintText: 'username',
-                              prefixIcon: const Icon(Icons.person),
-                              isPassword: false,
-                            ),
-                            TextUserInput(
-                              controller: _passwordController,
-                              elementWidthFactor: elementWidthFactor,
-                              hintText: 'password',
-                              prefixIcon: const Icon(Icons.key),
-                              isPassword: true,
-                            ),
-                            if (state.status == LoginStatus.loading)
-                              const CircularProgressIndicator(
-                                  color: Colors.blue)
-                            else
-                              FractionallySizedBox(
-                                widthFactor: elementWidthFactor,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 20.0),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      final email = _emailController.text;
-                                      final password = _passwordController.text;
+                ),
+                const SizedBox(height: 48),
 
-                                      context
-                                          .read<LoginBloc>()
-                                          .add(ExecuteLogin(email, password));
-                                    },
-                                    child: const Text(
-                                      'Login',
-                                      style: TextStyle(color: Colors.blue),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            FractionallySizedBox(
-                              widthFactor: elementWidthFactor,
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: 10.0),
-                                child: TextButton(
-                                  onPressed: () {
-                                    context.go('/register');
-                                  },
-                                  child: const Text(
-                                    'Don\'t have an account? Register',
-                                    style: TextStyle(color: Colors.blue),
-                                  ),
-                                ),
-                              ),
+                // Email Input
+                TextUserInput(
+                  controller: _emailController,
+                  elementWidthFactor: 0.8,
+                  hintText: 'Email',
+                  prefixIcon: const Icon(Icons.email_outlined),
+                  isPassword: false,
+                ),
+
+                // Password Input
+                TextUserInput(
+                  controller: _passwordController,
+                  elementWidthFactor: 0.8,
+                  hintText: 'Password',
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  isPassword: true,
+                ),
+
+                const SizedBox(height: 24),
+
+                // Login Button
+                BlocBuilder<LoginBloc, LoginState>(
+                  builder: (context, state) {
+                    return FractionallySizedBox(
+                      widthFactor: 0.8,
+                      child: ElevatedButton(
+                        onPressed: state is LoginLoading
+                            ? null
+                            : () {
+                          FocusScope.of(context).unfocus();
+                          context.read<LoginBloc>().add(
+                            LoginSubmitted(
+                              email: _emailController.text,
+                              password: _passwordController.text,
                             ),
-                          ],
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: state is LoginLoading
+                            ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            strokeWidth: 2,
+                          ),
+                        )
+                            : const Text(
+                          'Login',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                // Register Link
+                TextButton(
+                  onPressed: () => context.go('/register'),
+                  child: const Text(
+                    'Create an account',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  Flexible(
-                    flex: 1,
-                    child: Container(),
-                  ),
-                ],
-              );
-            },
-          );
-        },
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -22,3 +22,5 @@ class PostError extends PostState {
 
   PostError(this.message);
 }
+
+

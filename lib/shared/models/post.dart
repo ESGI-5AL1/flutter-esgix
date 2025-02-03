@@ -1,40 +1,63 @@
-import 'author.dart';  // Import the Author model
-import 'package:flutter/material.dart';
+import 'author.dart';
 
 class Post {
   final String id;
   final String content;
   final String imageUrl;
-  final String parent;
-  final int likes;
+  final Author author;
+  final int likesCount;
   final int commentsCount;
-  final Author author;  // Author object (or User if you prefer)
+  final bool likedByUser;
   final String createdAt;
   final String updatedAt;
 
-  const Post({
+  Post({
     required this.id,
     required this.content,
     required this.imageUrl,
-    required this.parent,
-    required this.likes,
-    required this.commentsCount,
     required this.author,
+    required this.likesCount,
+    required this.commentsCount,
+    required this.likedByUser,
     required this.createdAt,
     required this.updatedAt,
   });
 
   factory Post.fromJson(Map<String, dynamic> json) {
     return Post(
-      id: json['id'] ?? '',
-      content: json['content'] ?? '',
+      id: json['id'],
+      content: json['content'],
       imageUrl: json['imageUrl'] ?? '',
-      parent: json['parent'] ?? '',
-      likes: json['likesCount'] ?? 0,
-      commentsCount: json['commentsCount'] ?? 0,
       author: Author.fromJson(json['author']),
-      createdAt: json['createdAt'] ?? '',
-      updatedAt: json['updatedAt'] ?? '',
+      likesCount: json['likesCount'],
+      commentsCount: json['commentsCount'],
+      likedByUser: json['likedByUser'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+    );
+  }
+
+  Post copyWith({
+    String? id,
+    String? content,
+    String? imageUrl,
+    Author? author,
+    int? likesCount,
+    int? commentsCount,
+    bool? likedByUser,
+    String? createdAt,
+    String? updatedAt,
+  }) {
+    return Post(
+      id: id ?? this.id,
+      content: content ?? this.content,
+      imageUrl: imageUrl ?? this.imageUrl,
+      author: author ?? this.author,
+      likesCount: likesCount ?? this.likesCount,
+      commentsCount: commentsCount ?? this.commentsCount,
+      likedByUser: likedByUser ?? this.likedByUser,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

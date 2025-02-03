@@ -1,13 +1,12 @@
 part of 'login_bloc.dart';
 
-@immutable
-sealed class LoginEvent {
-  const LoginEvent();
-}
+abstract class LoginEvent {}
 
-class ExecuteLogin extends LoginEvent {
+class LoginSubmitted extends LoginEvent {
   final String email;
   final String password;
 
-  const ExecuteLogin(this.email, this.password);
+  LoginSubmitted({required this.email, required this.password});
 }
+
+class LogoutRequested extends LoginEvent {}

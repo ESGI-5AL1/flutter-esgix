@@ -1,118 +1,103 @@
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
-import 'package:esgix/shared/models/auth_result.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:meta/meta.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../shared/models/user.dart';
 
 part 'login_event.dart';
 
 part 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginBloc() : super(const LoginState()) {
-    on<ExecuteLogin>((event, emit) async {
-      emit(state.copyWith(status: LoginStatus.loading));
+  static const String _tokenKey = 'auth_token';
+  static const String _userIdKey = 'user_id';
 
-      final email = event.email;
-      final password = event.password;
+  final Dio dio;
 
-      try {
-        final authResult = await _login(email, password);
-        final token = authResult.token;
-        final user = authResult.user;
-        print("[TOKEN] : $token");
+  LoginBloc({Dio? dio}) :
+        dio = dio ?? Dio(),
+        super(LoginInitial()) {
+    on<LoginSubmitted>(_onLoginSubmitted);
+    on<LogoutRequested>(_onLogoutRequested);
+  }
 
-        emit(state.copyWith(
-            user: user,
-            status: LoginStatus.success
-        ));
+  Future<void> _onLoginSubmitted(
+      LoginSubmitted event,
+      Emitter<LoginState> emit,
+      ) async {
+    emit(LoginLoading());
+    final String? apiKey = dotenv.env['API_KEY'];
 
-      } catch (error) {
-        print("[ERROR] : $error");
-        emit(state.copyWith(
-          status: LoginStatus.error,
-        ));
+    try {
+      final response = await dio.post(
+        'https://esgix.tech/auth/login',
+        data: {
+          'email': event.email,
+          'password': event.password,
+        },
+        options: Options(
+          headers: {
+            'x-api-key': apiKey,
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final token = response.data['token'];
+        final userId = response.data['record']['id'];
+
+        // Save token to SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_tokenKey, token);
+        await prefs.setString(_userIdKey, userId);
+
+        emit(LoginSuccess(token: token));
+      } else {
+        emit(LoginFailure('Login failed: ${response.statusCode}'));
       }
-    });
-  }
-}
-
-Future<AuthResult> _login(String email, String password) async {
-  final String? token = dotenv.env['API_KEY'];
-
-  if (token == null) {
-    throw Exception('API_KEY not loaded from .env');
-  }
-
-  try {
-    final response = await Dio().post(
-      options: Options(headers: {
-        'x-api-key': token,
-        'Content-Type': 'application/json',
-      }),
-      "https://esgix.tech/auth/login",
-      data: {'email': email, 'password': password},
-    );
-
-    print('Response: ${response.data}');
-
-    final data = response.data;
-
-    if (data == null || data is! Map<String, dynamic>) {
-      print('Invalid or mmissing response data: $data');
-      return const AuthResult(
-        user: User(
-          username: "",
-          description: "",
-          id: "0",
-          email: "",
-          avatar: "",
-        ),
-        token: "",
-      );
-    }
-
-    final userInfo = data['record'];
-    final authToken = data['token'];
-
-    if (userInfo == null || userInfo is! Map<String, dynamic>) {
-      print("The user's information is invalid or missing: $userInfo");
-      return const AuthResult(
-        user: User(
-          username: "",
-          description: "",
-          id: "0",
-          email: "",
-          avatar: "",
-        ),
-        token: "",
-      );
-    }
-
-    final user = User.fromJson(userInfo);
-
-    print('User: ${user.username}, ${user.email}');
-    print('Token: $authToken');
-
-    return AuthResult(user: user, token: authToken);
-  } catch (e) {
-    if (e is DioException) {
-      print('Dio: ${e.response?.statusCode} - ${e.response?.data}');
-    } else {
-      print('[ERROR]: $e');
+    } on DioException catch (e) {
+      if (e.response != null) {
+        emit(LoginFailure(e.response?.data['message'] ?? 'Login failed'));
+      } else {
+        emit(LoginFailure('Network error: ${e.message}'));
+      }
+    } catch (error) {
+      emit(LoginFailure('An unexpected error occurred'));
     }
   }
 
-  return const AuthResult(
-    user: User(
-      username: "",
-      description: "",
-      id: "0",
-      email: "",
-      avatar: "",
-    ),
-    token: "",
-  );
+  Future<void> _onLogoutRequested(
+      LogoutRequested event,
+      Emitter<LoginState> emit,
+      ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      // Clear all auth-related data
+      await prefs.remove(_tokenKey);
+      await prefs.remove(_userIdKey);
+      emit(LoginInitial());
+    } catch (error) {
+      emit(LoginFailure('Failed to logout'));
+    }
+  }
+
+  // Helper method to check if user is logged in
+  static Future<bool> isLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasToken = prefs.containsKey(_tokenKey);
+    final hasUserId = prefs.containsKey(_userIdKey);
+    return hasToken && hasUserId;
+  }
+
+  // Helper method to get token
+  static Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_tokenKey);
+  }
+
+  static Future<String?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_userIdKey);
+  }
 }
