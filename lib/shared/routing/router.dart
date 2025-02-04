@@ -8,6 +8,8 @@ import '../../login_screen/login_screen.dart';
 import '../../profile_screen/profile_screen.dart';
 import '../../register_screen/register_bloc/register_bloc.dart';
 import '../../register_screen/register_screen.dart';
+import '../../post_comments_screen/post_comments_screen.dart';
+import '../bloc/post_widget_bloc/post_widget_bloc.dart';
 
 final router = GoRouter(
   initialLocation: '/login',
@@ -47,6 +49,16 @@ final router = GoRouter(
     GoRoute(
       path: '/create-post',
       builder: (context, state) => const CreatePostScreen(),
+    ),
+    GoRoute(
+      path: '/post/:postId/comments',
+      builder: (context, state) {
+        final postId = state.pathParameters['postId']!;
+        return BlocProvider(
+          create: (context) => PostBloc(dio: Dio()),
+          child: PostCommentsScreen(postId: postId),
+        );
+      },
     ),
   ],
 );

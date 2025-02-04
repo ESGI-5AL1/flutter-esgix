@@ -36,3 +36,15 @@ class UpdateLikeStatus extends PostEvent {
   final int likesCount;
   UpdateLikeStatus(this.postId, this.isLiked, this.likesCount);
 }
+
+class FetchComments extends PostEvent {
+  final String postId;
+
+  FetchComments({required this.postId});
+}
+
+class FetchPostById extends PostEvent {
+  final String postId;
+
+  FetchPostById({required this.postId});
+}
