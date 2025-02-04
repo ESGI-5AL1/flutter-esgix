@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../bloc/post_widget_bloc/post_widget_event.dart';
 import '../models/post.dart';
 import '../bloc/post_widget_bloc/post_widget_bloc.dart';
 import '../bloc/post_widget_bloc/post_widget_state.dart';
@@ -16,6 +17,7 @@ class PostWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userState = context.watch<UserBloc>().state;
+    final postBloc = context.read<PostBloc>();
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -108,7 +110,11 @@ class PostWidget extends StatelessWidget {
                 // Gestion du Like
                 GestureDetector(
                   onTap: () {
-                    print('Like clicked for post ${post.id}');
+                    if (post.likedByUser) {
+                      postBloc.add(DislikePost(postId: post.id));
+                    } else {
+                      postBloc.add(LikePost(postId: post.id));
+                    }
                   },
                   child: Row(
                     children: [

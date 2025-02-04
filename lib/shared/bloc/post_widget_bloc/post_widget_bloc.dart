@@ -12,7 +12,11 @@ class PostBloc extends Bloc<PostEvent, PostState> {
 
   PostBloc({required this.dio}) : super(PostInitial()) {
     on<FetchPosts>(_onFetchPosts);
-    on<FetchComments>(_onFetchComments); // Register the handler for FetchComments
+    on<FetchComments>(_onFetchComments);
+    on<FetchPostById>(_onFetchPostById);
+    on<DislikePost>(_onDislikePost);
+    on<LikePost>(_onLikePost);
+
   }
 
   Future<void> _onFetchPosts(FetchPosts event, Emitter<PostState> emit) async {
@@ -82,4 +86,86 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       emit(PostError('Failed to fetch comments: $error'));
     }
   }
+
+
+  Future<void> _onFetchPostById(FetchPostById event, Emitter<PostState> emit) async {
+    emit(PostLoading());
+    final String? token = dotenv.env['API_KEY'];
+
+    try {
+      final response = await dio.get(
+        'https://esgix.tech/posts/${event.postId}',
+        options: Options(
+          headers: {
+            'x-api-key': token,
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        if (data != null) {
+          final post = Post.fromJson(data);
+          emit(PostLoaded([post]));
+        } else {
+          emit(PostError('Data field is null.'));
+        }
+      } else {
+        emit(PostError('Failed to fetch post. Status code: ${response.statusCode}'));
+      }
+    } catch (error) {
+      emit(PostError('Failed to fetch post: $error'));
+    }
+  }
+
+  Future<void> _onLikePost(LikePost event, Emitter<PostState> emit) async {
+    final String? token = dotenv.env['API_KEY'];
+
+    try {
+      final response = await dio.post(
+        'https://esgix.tech/likes/${event.postId}',
+        options: Options(
+          headers: {
+            'x-api-key': token,
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        add(FetchPostById(postId: event.postId)); // Refresh the post data
+      } else {
+        emit(PostError('Failed to like post. Status code: ${response.statusCode}'));
+      }
+    } catch (error) {
+      emit(PostError('Failed to like post: $error'));
+    }
+  }
+
+  Future<void> _onDislikePost(DislikePost event, Emitter<PostState> emit) async {
+    final String? token = dotenv.env['API_KEY'];
+
+    try {
+      final response = await dio.delete(
+        'https://esgix.tech/likes/${event.postId}',
+        options: Options(
+          headers: {
+            'x-api-key': token,
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        add(FetchPostById(postId: event.postId)); // Refresh the post data
+      } else {
+        emit(PostError('Failed to dislike post. Status code: ${response.statusCode}'));
+      }
+    } catch (error) {
+      emit(PostError('Failed to dislike post: $error'));
+    }
+  }
+
 }
+
