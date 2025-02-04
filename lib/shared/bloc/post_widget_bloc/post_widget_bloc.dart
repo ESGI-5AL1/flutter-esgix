@@ -18,8 +18,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     on<DeletePost>(_onDeletePost);
     on<LikePost>(_onLikePost);
     on<UpdateLikeStatus>(_onUpdateLikeStatus);
-    on<FetchPosts>(_onFetchPosts);
     on<FetchComments>(_onFetchComments);
+    on<FetchPostById>(_onFetchPostById);
   }
 
   Future<String?> _getAuthToken() async {
@@ -34,7 +34,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
 
     try {
       final response = await dio.get(
-        'https://esgix.tech/posts?page=0&offset=20',
+        'https://esgix.tech/posts?page=0&offset=-1',
         options: Options(
           headers: {
             'x-api-key': apiKey,
@@ -193,73 +193,83 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       emit(PostLoaded(updatedPosts));
     }
   }
-}
 
-Future<void> _onFetchComments(FetchComments event, Emitter<PostState> emit) async {
-  emit(PostLoading());
-  final String? token = dotenv.env['API_KEY'];
+  Future<void> _onFetchComments(FetchComments event, Emitter<PostState> emit) async {
+    emit(PostLoading());
+    final String? apiKey = dotenv.env['API_KEY'];
+    final String? authToken = await _getAuthToken();
 
-  try {
-    final response = await dio.get(
-      'https://esgix.tech/posts?parent=${event.postId}&page=0&offset=-1',
-      options: Options(
-        headers: {
-          'x-api-key': token,
-          'Content-Type': 'application/json',
-        },
-      ),
-    );
+    try {
+      final response = await dio.get(
+        'https://esgix.tech/posts?parent=${event.postId}&page=0&offset=-1',
+        options: Options(
+          headers: {
+            'x-api-key': apiKey,
+            'Authorization': authToken != null ? 'Bearer $authToken' : null,
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
 
-    if (response.statusCode == 200) {
-      final data = response.data['data'];
-      if (data is List) {
-        final comments = data.map((json) => Post.fromJson(json)).toList();
-        final currentState = state;
-        if (currentState is PostLoaded) {
-          final updatedPosts = List<Post>.from(currentState.posts)..addAll(comments);
-          emit(PostLoaded(updatedPosts));
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        if (data is List) {
+          final comments = data.map((json) => Post.fromJson(json)).toList();
+          final currentState = state;
+          if (currentState is PostLoaded) {
+            final updatedPosts = List<Post>.from(currentState.posts)..addAll(comments);
+            emit(PostLoaded(updatedPosts));
+          } else {
+            emit(PostLoaded(comments));
+          }
         } else {
-          emit(PostLoaded(comments));
+          emit(PostError('Data field is not a List.'));
         }
       } else {
-        emit(PostError('Data field is not a List.'));
+        emit(PostError('Failed to fetch comments. Status code: ${response.statusCode}'));
       }
-    } else {
-      emit(PostError('Failed to fetch comments. Status code: ${response.statusCode}'));
+    } catch (error) {
+      emit(PostError('Failed to fetch comments: $error'));
     }
-  } catch (error) {
-    emit(PostError('Failed to fetch comments: $error'));
   }
-}
 
+  Future<void> _onFetchPostById(FetchPostById event, Emitter<PostState> emit) async {
+    emit(PostLoading());
+    final String? apiKey = dotenv.env['API_KEY'];
+    final String? authToken = await _getAuthToken();
 
-Future<void> _onFetchPostById(FetchPostById event, Emitter<PostState> emit) async {
-  emit(PostLoading());
-  final String? token = dotenv.env['API_KEY'];
+    try {
+      final response = await dio.get(
+        'https://esgix.tech/posts/${event.postId}',
+        options: Options(
+          headers: {
+            'x-api-key': apiKey,
+            'Authorization': authToken != null ? 'Bearer $authToken' : null,
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
 
-  try {
-    final response = await dio.get(
-      'https://esgix.tech/posts/${event.postId}',
-      options: Options(
-        headers: {
-          'x-api-key': token,
-          'Content-Type': 'application/json',
-        },
-      ),
-    );
-
-    if (response.statusCode == 200) {
-      final data = response.data['data'];
-      if (data != null) {
-        final post = Post.fromJson(data);
-        emit(PostLoaded([post]));
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        if (data != null) {
+          final post = Post.fromJson(data);
+          emit(PostLoaded([post]));
+        } else {
+          emit(PostError('Data field is null.'));
+        }
       } else {
-        emit(PostError('Data field is null.'));
+        emit(PostError('Failed to fetch post. Status code: ${response.statusCode}'));
       }
-    } else {
-      emit(PostError('Failed to fetch post. Status code: ${response.statusCode}'));
+    } catch (error) {
+      emit(PostError('Failed to fetch post: $error'));
     }
-  } catch (error) {
-    emit(PostError('Failed to fetch post: $error'));
   }
+
+
+
+
 }
+
+
+

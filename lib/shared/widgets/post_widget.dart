@@ -1,263 +1,142 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../login_screen/login_bloc/login_bloc.dart';
 import '../bloc/post_widget_bloc/post_widget_bloc.dart';
 import '../bloc/post_widget_bloc/post_widget_event.dart';
 import '../models/post.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../bloc/post_widget_bloc/post_widget_event.dart';
-import '../models/post.dart';
-import '../bloc/post_widget_bloc/post_widget_bloc.dart';
-import '../bloc/post_widget_bloc/post_widget_state.dart';
-import '../bloc/user_bloc/user_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 class PostWidget extends StatelessWidget {
   final Post post;
 
   const PostWidget({required this.post, super.key});
-  const PostWidget({super.key, required this.post});
 
   @override
   Widget build(BuildContext context) {
-    final userState = context.watch<UserBloc>().state;
-    final postBloc = context.read<PostBloc>();
-
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header : Avatar + Username + Menu
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundImage: post.author.avatar.isNotEmpty
-                          ? NetworkImage(post.author.avatar)
-                          : null,
-                      child: post.author.avatar.isEmpty
-                          ? const Icon(Icons.person)
-                          : null,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      post.author.username,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-                // Menu contextuel (Edit/Delete) if user is the author
-                if (userState is UserLoaded && userState.user.id == post.author.id)
-                  PopupMenuButton<String>(
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        print('Edit post ${post.id}');
-                      } else if (value == 'delete') {
-                        print('Delete post ${post.id}');
-                      }
-                    },
-                    itemBuilder: (BuildContext context) => [
-                      const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                      const PopupMenuItem(value: 'delete', child: Text('Delete')),
-                    ],
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
-
-            // Post content
-            Text(
-              post.content,
-              style: const TextStyle(fontSize: 16),
-            ),
-
-            // Post image (if available)
-            if (post.imageUrl.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  post.imageUrl,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[200],
-                      height: 150,
-                      child: const Center(
-                        child: Icon(
-                          Icons.broken_image,
-                          size: 50,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-            const SizedBox(height: 8),
-
-            // Likes and comments
-            Row(
-              children: [
-                // Gestion du Like
-                GestureDetector(
-                  onTap: () {
-                    if (post.likedByUser) {
-                      postBloc.add(DislikePost(postId: post.id));
-                    } else {
-                      postBloc.add(LikePost(postId: post.id));
-                    }
-                  },
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.favorite,
-                        color: post.likedByUser ? Colors.red : Colors.grey,
-                      ),
-                      const SizedBox(width: 4),
-                      Text('${post.likes} likes'),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-
-                // Gestion des commentaires
-                GestureDetector(
-                  onTap: () {
-                    context.push('/post/${post.id}/comments');
-                  },
-                  child: Row(
-                    children: [
-                      const Icon(Icons.comment, color: Colors.blue),
-                      const SizedBox(width: 4),
-                      Text('${post.commentsCount} comments'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
     return FutureBuilder<String?>(
       future: LoginBloc.getUserId(),
       builder: (context, snapshot) {
         final isUserPost = snapshot.data == post.author.id;
 
-        return Card(
-          margin: const EdgeInsets.all(8.0),
-          elevation: 2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header with user info and delete button
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundImage: NetworkImage(post.author.avatar),
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundImage: post.author.avatar.isNotEmpty
+                              ? NetworkImage(post.author.avatar)
+                              : null,
+                          child: post.author.avatar.isEmpty
+                              ? const Icon(Icons.person)
+                              : null,
+                        ),
+                        const SizedBox(width: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              post.author.username,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Text(
+                              _formatDate(post.createdAt),
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12.0),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    if (isUserPost)
+                      Row(
                         children: [
-                          Text(
-                            post.author.username,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () {
+                              // Action pour éditer le post
+                            },
                           ),
-                          Text(
-                            _formatDate(post.createdAt),
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontSize: 12,
-                            ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Supprimer la publication'),
+                                  content: const Text('Vous confirmez la suppression?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('Annuler'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        context.read<PostBloc>().add(DeletePost(post.id));
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text(
+                                        'Supprimer',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
-                    ),
-                    if (isUserPost)
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline),
-                        color: Colors.red,
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Supprimer la publication'),
-                              content: const Text(
-                                  'Vous confirmez la suppression?'
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('Annuler'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    context.read<PostBloc>().add(DeletePost(post.id));
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text(
-                                    'Supprimer',
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
                   ],
                 ),
-              ),
-
-              // Post content
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Text(
+                const SizedBox(height: 8),
+                Text(
                   post.content,
                   style: const TextStyle(fontSize: 16),
                 ),
-              ),
-
-              // Post image if exists
-              if (post.imageUrl.isNotEmpty)
-                Container(
-                  constraints: const BoxConstraints(
-                    maxHeight: 300,
+                if (post.imageUrl.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      post.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[200],
+                          height: 150,
+                          child: const Center(
+                            child: Icon(
+                              Icons.broken_image,
+                              size: 50,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                  width: double.infinity,
-                  child: Image.network(
-                    post.imageUrl,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-
-              // Interaction buttons and counters
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(
+                ],
+                const SizedBox(height: 8),
+                Row(
                   children: [
-                    // Like button and count
                     InkWell(
                       onTap: () {
                         context.read<PostBloc>().add(LikePost(post.id));
@@ -280,25 +159,29 @@ class PostWidget extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 24),
-                    // Comments count
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.comment_outlined,
-                          color: Colors.grey,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          post.commentsCount.toString(),
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                      ],
+                    GestureDetector(
+                      onTap: () {
+                        context.push('/post/${post.id}/comments');
+                      },
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.comment_outlined,
+                            color: Colors.blue,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            post.commentsCount.toString(),
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

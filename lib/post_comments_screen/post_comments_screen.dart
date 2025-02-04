@@ -32,13 +32,13 @@ class PostCommentsScreen extends StatelessWidget {
           } else if (state is PostLoaded) {
             final post = state.posts.firstWhere(
                   (p) => p.id == postId,
-              orElse: () => const Post(
+              orElse: () => Post(
                 id: '',
                 content: '',
                 imageUrl: '',
-                parent: '',
-                likes: 0,
+                likesCount: 0,
                 commentsCount: 0,
+                parent: '',
                 author: Author(id: '', username: '', avatar: ''),
                 likedByUser: false,
                 createdAt: '',

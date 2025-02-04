@@ -6,6 +6,7 @@ class Post {
   final String imageUrl;
   final Author author;
   final int likesCount;
+  final String parent;
   final int commentsCount;
   final bool likedByUser;
   final String createdAt;
@@ -17,6 +18,7 @@ class Post {
     required this.imageUrl,
     required this.author,
     required this.likesCount,
+    required this.parent,
     required this.commentsCount,
     required this.likedByUser,
     required this.createdAt,
@@ -30,6 +32,7 @@ class Post {
       imageUrl: json['imageUrl'] ?? '',
       author: Author.fromJson(json['author']),
       likesCount: json['likesCount'],
+      parent: json['parent'],
       commentsCount: json['commentsCount'],
       likedByUser: json['likedByUser'],
       createdAt: json['createdAt'],
@@ -43,6 +46,7 @@ class Post {
     String? imageUrl,
     Author? author,
     int? likesCount,
+    String? parent,
     int? commentsCount,
     bool? likedByUser,
     String? createdAt,
@@ -54,6 +58,7 @@ class Post {
       imageUrl: imageUrl ?? this.imageUrl,
       author: author ?? this.author,
       likesCount: likesCount ?? this.likesCount,
+      parent: parent ?? this.parent,
       commentsCount: commentsCount ?? this.commentsCount,
       likedByUser: likedByUser ?? this.likedByUser,
       createdAt: createdAt ?? this.createdAt,
