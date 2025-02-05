@@ -6,11 +6,13 @@ import '../../create_post_screen/create_post_screen.dart';
 import '../../feed_screen/feed_screen.dart';
 import '../../login_screen/login_bloc/login_bloc.dart';
 import '../../login_screen/login_screen.dart';
+import '../../profile_screen/profile_post_screen.dart';
 import '../../profile_screen/profile_screen.dart';
 import '../../register_screen/register_bloc/register_bloc.dart';
 import '../../register_screen/register_screen.dart';
 import '../../post_comments_screen/post_comments_screen.dart';
 import '../bloc/post_widget_bloc/post_widget_bloc.dart';
+import '../models/user.dart';
 
 final router = GoRouter(
   initialLocation: '/login',
@@ -61,5 +63,13 @@ final router = GoRouter(
         );
       },
     ),
+    GoRoute(
+      path: '/profile-post',
+      builder: (context, state) {
+        final user = state.extra as User;
+        return ProfilePostScreen(user: user);
+      },
+    ),
+
   ],
 );

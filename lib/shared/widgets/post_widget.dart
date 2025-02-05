@@ -3,9 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../login_screen/login_bloc/login_bloc.dart';
+import '../../profile_screen/profile_post_screen.dart';
 import '../bloc/post_widget_bloc/post_widget_bloc.dart';
 import '../bloc/post_widget_bloc/post_widget_event.dart';
 import '../models/post.dart';
+import '../models/user.dart';
+
 
 class PostWidget extends StatelessWidget {
   final Post post;
@@ -33,38 +36,72 @@ class PostWidget extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    // Section de l'utilisateur avec navigation
                     Row(
                       children: [
-                        CircleAvatar(
-                          backgroundImage: post.author.avatar.isNotEmpty
-                              ? NetworkImage(post.author.avatar)
-                              : null,
-                          child: post.author.avatar.isEmpty
-                              ? const Icon(Icons.person)
-                              : null,
+                        GestureDetector(
+                          onTap: () {
+                            final user = User(
+                              id: post.author.id,
+                              username: post.author.username,
+                              avatar: post.author.avatar, description: '', email: ''
+                            );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProfilePostScreen(user: user),
+                              ),
+                            );
+                          },
+                          child: CircleAvatar(
+                            backgroundImage: post.author.avatar.isNotEmpty
+                                ? NetworkImage(post.author.avatar)
+                                : null,
+                            child: post.author.avatar.isEmpty
+                                ? const Icon(Icons.person)
+                                : null,
+                          ),
                         ),
                         const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              post.author.username,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                        GestureDetector(
+                          onTap: () {
+                            final user = User(
+                              id: post.author.id,
+                              username: post.author.username,
+                              email: 'email@example.com', // Exemple
+                              description: 'User description', // Exemple
+                              avatar: post.author.avatar,
+                            );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProfilePostScreen(user: user),
                               ),
-                            ),
-                            Text(
-                              _formatDate(post.createdAt),
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 12,
+                            );
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                post.author.username,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
                               ),
-                            ),
-                          ],
+                              Text(
+                                _formatDate(post.createdAt),
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
+                    // Options de modification ou suppression
                     if (isUserPost)
                       Row(
                         children: [
@@ -89,7 +126,9 @@ class PostWidget extends StatelessWidget {
                                     ),
                                     TextButton(
                                       onPressed: () {
-                                        context.read<PostBloc>().add(DeletePost(post.id));
+                                        context
+                                            .read<PostBloc>()
+                                            .add(DeletePost(post.id));
                                         Navigator.pop(context);
                                       },
                                       child: const Text(
@@ -107,6 +146,7 @@ class PostWidget extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
+                // Contenu du post
                 Text(
                   post.content,
                   style: const TextStyle(fontSize: 16),
@@ -135,6 +175,7 @@ class PostWidget extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: 8),
+                // Boutons Like et Comment
                 Row(
                   children: [
                     InkWell(
