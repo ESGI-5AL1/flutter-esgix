@@ -20,11 +20,47 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     on<UpdateLikeStatus>(_onUpdateLikeStatus);
     on<FetchComments>(_onFetchComments);
     on<FetchPostById>(_onFetchPostById);
+    on<FetchUserPosts>(_onFetchUserPosts);
+    on<EditPost>(_onEditPost);
   }
 
   Future<String?> _getAuthToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_tokenKey);
+  }
+
+  Future<void> _onFetchUserPosts(
+      FetchUserPosts event, Emitter<PostState> emit) async {
+    emit(PostLoading());
+    final String? token = dotenv.env['API_KEY'];
+
+    try {
+      final response = await dio.get(
+        'https://esgix.tech/posts',
+        queryParameters: {'author': event.userId, 'page': '0', 'offset': '10'},
+        options: Options(
+          headers: {
+            'x-api-key': token,
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        if (data is List) {
+          final posts = data.map((json) => Post.fromJson(json)).toList();
+
+          final userPosts =
+              posts.where((post) => post.author.id == event.userId).toList();
+          emit(PostLoaded(userPosts));
+        } else {
+          emit(PostError('Data field is not a List.'));
+        }
+      }
+    } catch (error) {
+      emit(PostError('Failed to fetch user posts: $error'));
+    }
   }
 
   Future<void> _onFetchPosts(FetchPosts event, Emitter<PostState> emit) async {
@@ -35,13 +71,11 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     try {
       final response = await dio.get(
         'https://esgix.tech/posts?page=0&offset=-1',
-        options: Options(
-          headers: {
-            'x-api-key': apiKey,
-            'Authorization': authToken != null ? 'Bearer $authToken' : null,
-            'Content-Type': 'application/json',
-          }
-        ),
+        options: Options(headers: {
+          'x-api-key': apiKey,
+          'Authorization': authToken != null ? 'Bearer $authToken' : null,
+          'Content-Type': 'application/json',
+        }),
       );
 
       if (response.statusCode == 200) {
@@ -53,7 +87,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
           emit(PostError('Data field is not a List.'));
         }
       } else {
-        emit(PostError('Failed to fetch posts. Status code: ${response.statusCode}'));
+        emit(PostError(
+            'Failed to fetch posts. Status code: ${response.statusCode}'));
       }
     } catch (error) {
       emit(PostError('Failed to fetch posts: $error'));
@@ -64,6 +99,55 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     if (state is PostLoaded) {
       final currentState = state as PostLoaded;
       emit(PostLoaded([event.post, ...currentState.posts]));
+    }
+  }
+
+  Future<void> _onEditPost(EditPost event, Emitter<PostState> emit) async {
+    if (state is! PostLoaded) return;
+    final currentState = state as PostLoaded;
+    final String? apiKey = dotenv.env['API_KEY'];
+    final String? token = await LoginBloc.getToken();
+
+    try {
+      final response = await dio.put(
+        'https://esgix.tech/posts/${event.postId}',
+        data: {
+          'content': event.content,
+          'imageUrl': event.imageUrl,
+        },
+        options: Options(
+          headers: {
+            'x-api-key': apiKey,
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final updatedPosts = currentState.posts.map((post) {
+          if (post.id == event.postId) {
+            return post.copyWith(
+              content: event.content,
+              imageUrl: event.imageUrl,
+            );
+          }
+          return post;
+        }).toList();
+
+        emit(PostLoaded(updatedPosts));
+
+        if (event.isProfileScreen) {
+          final userId = await LoginBloc.getUserId();
+          if (userId != null) {
+            add(FetchUserPosts(userId));
+          }
+        } else {
+          add(FetchPosts());
+        }
+      }
+    } catch (error) {
+      emit(PostError('Failed to edit post: $error'));
     }
   }
 
@@ -92,12 +176,12 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final newPost = Post.fromJson(response.data);
-        add(AddNewPost(newPost));
+        add(FetchPosts());
       } else {
         emit(PostError('Failed to create post. Status code: ${response.statusCode}'));
       }
     } catch (error) {
+      print(error.toString());
       emit(PostError('Failed to create new post'));
     }
   }
@@ -158,12 +242,12 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // Update the post's like status in the state
         final updatedPosts = currentState.posts.map((post) {
           if (post.id == event.postId) {
             return post.copyWith(
               likedByUser: !post.likedByUser,
-              likesCount: post.likedByUser ? post.likesCount - 1 : post.likesCount + 1,
+              likesCount:
+                  post.likedByUser ? post.likesCount - 1 : post.likesCount + 1,
             );
           }
           return post;
@@ -172,9 +256,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
         emit(PostLoaded(updatedPosts));
       }
     } catch (error) {
-      // If the like request fails, we might want to revert the optimistic update
       emit(PostError('Failed to like post'));
-      emit(currentState); // Revert to previous state
+      emit(currentState);
     }
   }
 
@@ -194,7 +277,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     }
   }
 
-  Future<void> _onFetchComments(FetchComments event, Emitter<PostState> emit) async {
+  Future<void> _onFetchComments(
+      FetchComments event, Emitter<PostState> emit) async {
     emit(PostLoading());
     final String? apiKey = dotenv.env['API_KEY'];
     final String? authToken = await _getAuthToken();
@@ -217,7 +301,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
           final comments = data.map((json) => Post.fromJson(json)).toList();
           final currentState = state;
           if (currentState is PostLoaded) {
-            final updatedPosts = List<Post>.from(currentState.posts)..addAll(comments);
+            final updatedPosts = List<Post>.from(currentState.posts)
+              ..addAll(comments);
             emit(PostLoaded(updatedPosts));
           } else {
             emit(PostLoaded(comments));
@@ -226,14 +311,16 @@ class PostBloc extends Bloc<PostEvent, PostState> {
           emit(PostError('Data field is not a List.'));
         }
       } else {
-        emit(PostError('Failed to fetch comments. Status code: ${response.statusCode}'));
+        emit(PostError(
+            'Failed to fetch comments. Status code: ${response.statusCode}'));
       }
     } catch (error) {
       emit(PostError('Failed to fetch comments: $error'));
     }
   }
 
-  Future<void> _onFetchPostById(FetchPostById event, Emitter<PostState> emit) async {
+  Future<void> _onFetchPostById(
+      FetchPostById event, Emitter<PostState> emit) async {
     emit(PostLoading());
     final String? apiKey = dotenv.env['API_KEY'];
     final String? authToken = await _getAuthToken();
@@ -259,17 +346,11 @@ class PostBloc extends Bloc<PostEvent, PostState> {
           emit(PostError('Data field is null.'));
         }
       } else {
-        emit(PostError('Failed to fetch post. Status code: ${response.statusCode}'));
+        emit(PostError(
+            'Failed to fetch post. Status code: ${response.statusCode}'));
       }
     } catch (error) {
       emit(PostError('Failed to fetch post: $error'));
     }
   }
-
-
-
-
 }
-
-
-

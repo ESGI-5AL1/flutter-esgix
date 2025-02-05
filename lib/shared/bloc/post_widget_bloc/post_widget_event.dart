@@ -48,3 +48,22 @@ class FetchPostById extends PostEvent {
 
   FetchPostById({required this.postId});
 }
+
+class FetchUserPosts extends PostEvent {
+  final String userId;
+  FetchUserPosts(this.userId);
+}
+
+class EditPost extends PostEvent {
+  final String postId;
+  final String content;
+  final String imageUrl;
+  final bool isProfileScreen;
+
+  EditPost({
+    required this.postId,
+    required this.content,
+    required this.imageUrl,
+    required this.isProfileScreen,
+  });
+}

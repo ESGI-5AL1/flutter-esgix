@@ -23,15 +23,15 @@ class PostCommentsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Post and Comments'),
+        title: const Text('Post and Comments'),
       ),
       body: BlocBuilder<PostBloc, PostState>(
         builder: (context, state) {
           if (state is PostLoading) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (state is PostLoaded) {
             final post = state.posts.firstWhere(
-                  (p) => p.id == postId,
+              (p) => p.id == postId,
               orElse: () => Post(
                 id: '',
                 content: '',
@@ -46,7 +46,8 @@ class PostCommentsScreen extends StatelessWidget {
               ),
             );
 
-            final comments = state.posts.where((p) => p.parent == postId).toList();
+            final comments =
+                state.posts.where((p) => p.parent == postId).toList();
 
             return SingleChildScrollView(
               child: Padding(
@@ -54,25 +55,27 @@ class PostCommentsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Display the post or a message if not found
                     if (post.id.isEmpty)
-                      Center(child: Text('Post not found.'))
+                      const Center(child: Text('Post not found.'))
                     else
-                      PostWidget(post: post),
+                      PostWidget(post: post, isProfileScreen: false),
                     const SizedBox(height: 16),
-                    // Display the comments
                     ...comments.map((comment) => Padding(
-                      padding: const EdgeInsets.only(left: 16.0),
-                      child: PostWidget(post: comment),
-                    )),
+                          padding: const EdgeInsets.only(left: 16.0),
+                          child: PostWidget(
+                            post: comment,
+                            isProfileScreen: false,
+                          ),
+                        )),
                   ],
                 ),
               ),
             );
           } else if (state is PostError) {
-            return Center(child: Text('Failed to load post and comments.'));
+            return const Center(
+                child: Text('Failed to load post and comments.'));
           } else {
-            return Center(child: Text('Failed to load comments.'));
+            return const Center(child: Text('Failed to load comments.'));
           }
         },
       ),

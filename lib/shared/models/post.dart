@@ -27,16 +27,16 @@ class Post {
 
   factory Post.fromJson(Map<String, dynamic> json) {
     return Post(
-      id: json['id'],
-      content: json['content'],
+      id: json['id'] ?? '',
+      content: json['content'] ?? '',
       imageUrl: json['imageUrl'] ?? '',
-      author: Author.fromJson(json['author']),
-      likesCount: json['likesCount'],
-      parent: json['parent'],
-      commentsCount: json['commentsCount'],
-      likedByUser: json['likedByUser'],
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
+      author: Author.fromJson(json['author'] ?? {}),
+      likesCount: json['likesCount'] ?? 0,
+      parent: json['parent'] ?? '',
+      commentsCount: json['commentsCount'] ?? 0,
+      likedByUser: json['likedByUser'] ?? false,
+      createdAt: json['createdAt'] ?? '',
+      updatedAt: json['updatedAt'] ?? '',
     );
   }
 

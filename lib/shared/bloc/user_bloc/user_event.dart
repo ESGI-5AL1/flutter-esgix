@@ -18,3 +18,4 @@ class UpdateUserProfile extends UserEvent {
     required this.avatar,
   });
 }
+

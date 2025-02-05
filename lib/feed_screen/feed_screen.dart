@@ -47,7 +47,7 @@ class FeedScreen extends StatelessWidget {
                   return ListView.builder(
                     itemCount: posts.length,
                     itemBuilder: (context, index) {
-                      return PostWidget(post: posts[index]);
+                      return PostWidget(post: posts[index], isProfileScreen: false);
                     },
                   );
                 } else if (state is PostError) {

@@ -6,11 +6,14 @@ import '../../login_screen/login_bloc/login_bloc.dart';
 import '../bloc/post_widget_bloc/post_widget_bloc.dart';
 import '../bloc/post_widget_bloc/post_widget_event.dart';
 import '../models/post.dart';
+import 'edit_post_dialog.dart';
 
 class PostWidget extends StatelessWidget {
   final Post post;
+  final bool isProfileScreen;
 
-  const PostWidget({required this.post, super.key});
+  const PostWidget(
+      {required this.post, required this.isProfileScreen, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +74,12 @@ class PostWidget extends StatelessWidget {
                           IconButton(
                             icon: const Icon(Icons.edit, color: Colors.blue),
                             onPressed: () {
-                              // Action pour éditer le post
+                              showDialog(
+                                context: context,
+                                builder: (context) => EditPostDialog(
+                                    post: post,
+                                    isProfileScreen: isProfileScreen),
+                              );
                             },
                           ),
                           IconButton(
@@ -81,7 +89,8 @@ class PostWidget extends StatelessWidget {
                                 context: context,
                                 builder: (context) => AlertDialog(
                                   title: const Text('Supprimer la publication'),
-                                  content: const Text('Vous confirmez la suppression?'),
+                                  content: const Text(
+                                      'Vous confirmez la suppression?'),
                                   actions: [
                                     TextButton(
                                       onPressed: () => Navigator.pop(context),
@@ -89,7 +98,9 @@ class PostWidget extends StatelessWidget {
                                     ),
                                     TextButton(
                                       onPressed: () {
-                                        context.read<PostBloc>().add(DeletePost(post.id));
+                                        context
+                                            .read<PostBloc>()
+                                            .add(DeletePost(post.id));
                                         Navigator.pop(context);
                                       },
                                       child: const Text(

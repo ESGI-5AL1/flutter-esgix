@@ -64,7 +64,7 @@ class AppNavigationDrawer extends StatelessWidget {
           leading: const Icon(Icons.home),
           title: const Text('Feed'),
           onTap: () {
-            Navigator.pop(context); // Close drawer
+            Navigator.pop(context);
             context.go('/feed');
           },
         ),
@@ -72,7 +72,7 @@ class AppNavigationDrawer extends StatelessWidget {
           leading: const Icon(Icons.person),
           title: const Text('Profile'),
           onTap: () {
-            Navigator.pop(context); // Close drawer
+            Navigator.pop(context);
             context.go('/profile');
           },
         ),

@@ -1,4 +1,6 @@
 import 'package:esgix/shared/bloc/user_bloc/user_bloc.dart';
+import 'package:esgix/shared/datasources/user_data_source/user_data_source.dart';
+import 'package:esgix/shared/repositories/user_repository.dart';
 import 'package:esgix/shared/routing/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,6 +16,8 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
+
+
   const MyApp({super.key});
 
   @override
@@ -27,7 +31,7 @@ class MyApp extends StatelessWidget {
           create: (context) => PostBloc(dio: Dio()),
         ),
         BlocProvider(
-          create: (context) => UserBloc(dio: Dio()),
+          create: (context) => UserBloc(userRepository: UserRepository(dataSource: UserDataSource(dio: Dio()))),
         ),
       ],
       child: MaterialApp.router(
