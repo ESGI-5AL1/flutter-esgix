@@ -285,6 +285,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       );
 
       if (response.statusCode == 200) {
+        // Access the 'data' field which contains the array of posts
         final List<dynamic> searchResults = response.data['data'];
         final posts = searchResults.map((json) {
           return Post.fromJson(json as Map<String, dynamic>);
@@ -295,12 +296,10 @@ class PostBloc extends Bloc<PostEvent, PostState> {
         emit(PostError('Failed to search posts. Status code: ${response.statusCode}'));
       }
     } catch (error) {
-      print('Search error: $error');
+
       emit(PostError('Failed to search posts: $error'));
     }
   }
-
-
 
 }
 
