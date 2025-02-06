@@ -48,3 +48,8 @@ class FetchPostById extends PostEvent {
 
   FetchPostById({required this.postId});
 }
+
+class SearchPosts extends PostEvent {
+  final String query;
+  SearchPosts(this.query);
+}

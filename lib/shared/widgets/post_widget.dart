@@ -13,7 +13,7 @@ import '../models/user.dart';
 class PostWidget extends StatelessWidget {
   final Post post;
 
-  const PostWidget({required this.post, super.key});
+  const PostWidget({required this.post, super.key, required bool isProfileScreen});
 
   @override
   Widget build(BuildContext context) {

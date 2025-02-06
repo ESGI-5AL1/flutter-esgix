@@ -58,12 +58,12 @@ class PostCommentsScreen extends StatelessWidget {
                     if (post.id.isEmpty)
                       Center(child: Text('Post not found.'))
                     else
-                      PostWidget(post: post),
+                      PostWidget(post: post, isProfileScreen: false,),
                     const SizedBox(height: 16),
                     // Display the comments
                     ...comments.map((comment) => Padding(
                       padding: const EdgeInsets.only(left: 16.0),
-                      child: PostWidget(post: comment),
+                      child: PostWidget(post: comment, isProfileScreen: false,),
                     )),
                   ],
                 ),

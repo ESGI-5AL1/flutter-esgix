@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,22 +13,75 @@ import '../shared/bloc/user_bloc/user_bloc.dart';
 import '../shared/widgets/navigation_widget.dart';
 import '../shared/widgets/post_widget.dart';
 
-class FeedScreen extends StatelessWidget {
+class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Fetch posts
-    context.read<PostBloc>().add(FetchPosts());
+  State<FeedScreen> createState() => _FeedScreenState();
+}
 
+class _FeedScreenState extends State<FeedScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<PostBloc>().add(FetchPosts());
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (query.isEmpty) {
+        context.read<PostBloc>().add(FetchPosts());
+      } else {
+        context.read<PostBloc>().add(SearchPosts(query));
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('ESGIX'),
       ),
-      drawer: const AppNavigationDrawer(), // Add the drawer here
+      drawer: const AppNavigationDrawer(),
       body: Column(
         children: [
-          // Add FutureBuilder in the widget tree
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search posts...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    context.read<PostBloc>().add(FetchPosts());
+                  },
+                )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                filled: true,
+                fillColor: Colors.grey[100],
+              ),
+              onChanged: _onSearchChanged,
+            ),
+          ),
           FutureBuilder<String?>(
             future: LoginBloc.getUserId(),
             builder: (context, snapshot) {
@@ -36,7 +91,6 @@ class FeedScreen extends StatelessWidget {
               return const SizedBox.shrink();
             },
           ),
-          // Posts list in Expanded to take remaining space
           Expanded(
             child: BlocBuilder<PostBloc, PostState>(
               builder: (context, state) {
@@ -44,17 +98,31 @@ class FeedScreen extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is PostLoaded) {
                   final posts = state.posts;
-                  return ListView.builder(
-                    itemCount: posts.length,
-                    itemBuilder: (context, index) {
-                      return PostWidget(post: posts[index]);
+                  if (posts.isEmpty) {
+                    return const Center(
+                      child: Text('No posts found'),
+                    );
+                  }
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      if (_searchController.text.isEmpty) {
+                        context.read<PostBloc>().add(FetchPosts());
+                      }
                     },
+                    child: ListView.builder(
+                      itemCount: posts.length,
+                      itemBuilder: (context, index) {
+                        return PostWidget(
+                          post: posts[index],
+                          isProfileScreen: false,
+                        );
+                      },
+                    ),
                   );
                 } else if (state is PostError) {
                   return Center(child: Text('Error: ${state.message}'));
-                } else {
-                  return const Center(child: Text('No posts available.'));
                 }
+                return const Center(child: Text('No posts available.'));
               },
             ),
           ),

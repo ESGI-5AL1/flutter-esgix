@@ -114,7 +114,7 @@ class ProfilePostScreen extends StatelessWidget {
       itemCount: posts.length,
       itemBuilder: (context, index) {
         final post = posts[index];
-        return PostWidget(post: post); // Réutilisation de PostWidget
+        return PostWidget(post: post, isProfileScreen: false,); // Réutilisation de PostWidget
       },
     );
   }

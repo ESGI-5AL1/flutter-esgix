@@ -20,6 +20,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     on<UpdateLikeStatus>(_onUpdateLikeStatus);
     on<FetchComments>(_onFetchComments);
     on<FetchPostById>(_onFetchPostById);
+    on<SearchPosts>(_onSearchPosts);
   }
 
   Future<String?> _getAuthToken() async {
@@ -265,7 +266,39 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       emit(PostError('Failed to fetch post: $error'));
     }
   }
+  Future<void> _onSearchPosts(SearchPosts event, Emitter<PostState> emit) async {
+    emit(PostLoading());
+    final String? apiKey = dotenv.env['API_KEY'];
 
+    try {
+      final response = await dio.get(
+        'https://esgix.tech/search',
+        queryParameters: {
+          'query': event.query,
+        },
+        options: Options(
+          headers: {
+            'x-api-key': apiKey,
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> searchResults = response.data['data'];
+        final posts = searchResults.map((json) {
+          return Post.fromJson(json as Map<String, dynamic>);
+        }).toList();
+
+        emit(PostLoaded(posts));
+      } else {
+        emit(PostError('Failed to search posts. Status code: ${response.statusCode}'));
+      }
+    } catch (error) {
+      print('Search error: $error');
+      emit(PostError('Failed to search posts: $error'));
+    }
+  }
 
 
 
