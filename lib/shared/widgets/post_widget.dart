@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:esgix/shared/widgets/comment_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +9,8 @@ import '../bloc/post_widget_bloc/post_widget_bloc.dart';
 import '../bloc/post_widget_bloc/post_widget_event.dart';
 import '../models/post.dart';
 import '../models/user.dart';
+
+
 
 class EditPostDialog extends StatefulWidget {
   final Post post;
@@ -72,14 +74,14 @@ class _EditPostDialogState extends State<EditPostDialog> {
         TextButton(
           onPressed: () {
             context.read<PostBloc>().add(
-                  UpdatePost(
-                    postId: widget.post.id,
-                    content: _contentController.text,
-                    imageUrl: _imageUrlController.text.isEmpty
-                        ? null
-                        : _imageUrlController.text,
-                  ),
-                );
+              UpdatePost(
+                postId: widget.post.id,
+                content: _contentController.text,
+                imageUrl: _imageUrlController.text.isEmpty
+                    ? null
+                    : _imageUrlController.text,
+              ),
+            );
             Navigator.pop(context);
           },
           child: const Text('Enregistrer'),
@@ -134,8 +136,7 @@ class PostWidget extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    ProfilePostScreen(user: user),
+                                builder: (context) => ProfilePostScreen(user: user),
                               ),
                             );
                           },
@@ -161,8 +162,7 @@ class PostWidget extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    ProfilePostScreen(user: user),
+                                builder: (context) => ProfilePostScreen(user: user),
                               ),
                             );
                           },
@@ -196,8 +196,7 @@ class PostWidget extends StatelessWidget {
                             onPressed: () {
                               showDialog(
                                 context: context,
-                                builder: (context) =>
-                                    EditPostDialog(post: post),
+                                builder: (context) => EditPostDialog(post: post),
                               );
                             },
                           ),
@@ -208,8 +207,7 @@ class PostWidget extends StatelessWidget {
                                 context: context,
                                 builder: (context) => AlertDialog(
                                   title: const Text('Supprimer la publication'),
-                                  content: const Text(
-                                      'Vous confirmez la suppression?'),
+                                  content: const Text('Vous confirmez la suppression?'),
                                   actions: [
                                     TextButton(
                                       onPressed: () => Navigator.pop(context),
@@ -273,22 +271,26 @@ class PostWidget extends StatelessWidget {
                       },
                       child: Row(
                         children: [
-                          Icon(
-                            post.likedByUser
-                                ? Icons.favorite
-                                : Icons.favorite_outline,
-                            color: post.likedByUser ? Colors.red : Colors.grey,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            post.likesCount.toString(),
-                            style: const TextStyle(color: Colors.grey),
+                          TextButton.icon(
+                            onPressed: () {
+                              context.read<PostBloc>().add(LikePost(post.id));
+                            },
+                            icon: Icon(
+                              post.likedByUser ? Icons.favorite : Icons.favorite_border,
+                              color: post.likedByUser ? Colors.red : Colors.grey,
+                            ),
+                            label: Text(
+                              post.likesCount.toString(),
+                              style: TextStyle(
+                                color: post.likedByUser ? Colors.red : Colors.grey,
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(width: 24),
+                    // View comments button
                     GestureDetector(
                       onTap: () {
                         context.push('/post/${post.id}/comments');
@@ -304,6 +306,33 @@ class PostWidget extends StatelessWidget {
                           Text(
                             post.commentsCount.toString(),
                             style: const TextStyle(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    // Reply button
+                    InkWell(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => CommentDialog(post: post),
+                        );
+                      },
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.reply,
+                            color: Colors.blue,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 4),
+                          const Text(
+                            'Répondre',
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontSize: 14,
+                            ),
                           ),
                         ],
                       ),

@@ -7,6 +7,12 @@ abstract class PostEvent {}
 
 class FetchPosts extends PostEvent {}
 
+class FetchUserPosts extends PostEvent {
+  final String userId;
+
+  FetchUserPosts({required this.userId});
+}
+
 class AddNewPost extends PostEvent {
   final Post post;
 
@@ -15,8 +21,12 @@ class AddNewPost extends PostEvent {
 
 class CreatePost extends PostEvent {
   final String content;
+  final String? imageUrl;
 
-  CreatePost(this.content);
+  CreatePost({
+    required this.content,
+    this.imageUrl,
+  });
 }
 
 class DeletePost extends PostEvent {
@@ -64,4 +74,17 @@ class UpdatePost extends PostEvent {
     required this.content,
     this.imageUrl,
   });
+}
+
+class CreateComment extends PostEvent {
+  final String content;
+  final String parentId;
+
+  CreateComment(this.content, this.parentId);
+}
+
+class FetchUserLikes extends PostEvent {
+  final String userId;
+
+  FetchUserLikes({required this.userId});
 }

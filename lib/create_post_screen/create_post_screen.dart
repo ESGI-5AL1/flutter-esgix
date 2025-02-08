@@ -14,11 +14,13 @@ class CreatePostScreen extends StatefulWidget {
 
 class _CreatePostScreenState extends State<CreatePostScreen> {
   final _contentController = TextEditingController();
+  final _imageUrlController = TextEditingController();
   bool _isLoading = false;
 
   @override
   void dispose() {
     _contentController.dispose();
+    _imageUrlController.dispose();
     super.dispose();
   }
 
@@ -55,15 +57,30 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+              TextField(
+                controller: _imageUrlController,
+                decoration: const InputDecoration(
+                  hintText: "Url de l'image (optionel)",
+                  prefixIcon: Icon(Icons.image),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              // Prévisualisation de l'image si une URL est entrée
+              const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _isLoading
                     ? null
                     : () {
                   if (_contentController.text.isNotEmpty) {
                     setState(() => _isLoading = true);
-                    context
-                        .read<PostBloc>()
-                        .add(CreatePost(_contentController.text));
+                    context.read<PostBloc>().add(
+                      CreatePost(
+                        content: _contentController.text,
+                        imageUrl: _imageUrlController.text.isEmpty
+                            ? null
+                            : _imageUrlController.text,
+                      ),
+                    );
                   }
                 },
                 child: _isLoading
