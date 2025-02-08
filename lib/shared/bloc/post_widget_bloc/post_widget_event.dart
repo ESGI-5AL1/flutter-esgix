@@ -53,3 +53,15 @@ class SearchPosts extends PostEvent {
   final String query;
   SearchPosts(this.query);
 }
+
+class UpdatePost extends PostEvent {
+  final String postId;
+  final String content;
+  final String? imageUrl;
+
+  UpdatePost({
+    required this.postId,
+    required this.content,
+    this.imageUrl,
+  });
+}

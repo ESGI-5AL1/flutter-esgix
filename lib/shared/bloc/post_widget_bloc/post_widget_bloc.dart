@@ -21,6 +21,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     on<FetchComments>(_onFetchComments);
     on<FetchPostById>(_onFetchPostById);
     on<SearchPosts>(_onSearchPosts);
+    on<UpdatePost>(_onUpdatePost);
   }
 
   Future<String?> _getAuthToken() async {
@@ -103,6 +104,53 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     }
   }
 
+  Future<void> _onUpdatePost(UpdatePost event, Emitter<PostState> emit) async {
+    final String? apiKey = dotenv.env['API_KEY'];
+    final String? authToken = await LoginBloc.getToken();
+
+    if (authToken == null) {
+      emit(PostError('Authentication required'));
+      return;
+    }
+
+    try {
+      final response = await dio.put(
+        'https://esgix.tech/posts/${event.postId}',
+        data: {
+          'content': event.content,
+          if (event.imageUrl != null) 'imageUrl': event.imageUrl,
+        },
+        options: Options(
+          headers: {
+            'x-api-key': apiKey,
+            'Authorization': 'Bearer $authToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        if (state is PostLoaded) {
+          final currentState = state as PostLoaded;
+          final updatedPosts = currentState.posts.map((post) {
+            if (post.id == event.postId) {
+              return post.copyWith(
+                content: event.content,
+                imageUrl: event.imageUrl ?? post.imageUrl,
+              );
+            }
+            return post;
+          }).toList();
+          emit(PostLoaded(updatedPosts));
+        }
+      } else {
+        emit(PostError('Failed to update post'));
+      }
+    } catch (error) {
+      emit(PostError('Failed to update post: $error'));
+    }
+  }
+
   Future<void> _onDeletePost(DeletePost event, Emitter<PostState> emit) async {
     final String? apiKey = dotenv.env['API_KEY'];
     final String? authToken = await LoginBloc.getToken();
@@ -159,7 +207,6 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // Update the post's like status in the state
         final updatedPosts = currentState.posts.map((post) {
           if (post.id == event.postId) {
             return post.copyWith(
@@ -173,9 +220,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
         emit(PostLoaded(updatedPosts));
       }
     } catch (error) {
-      // If the like request fails, we might want to revert the optimistic update
       emit(PostError('Failed to like post'));
-      emit(currentState); // Revert to previous state
+      emit(currentState);
     }
   }
 
@@ -285,7 +331,6 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       );
 
       if (response.statusCode == 200) {
-        // Access the 'data' field which contains the array of posts
         final List<dynamic> searchResults = response.data['data'];
         final posts = searchResults.map((json) {
           return Post.fromJson(json as Map<String, dynamic>);

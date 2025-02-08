@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -9,11 +10,94 @@ import '../bloc/post_widget_bloc/post_widget_event.dart';
 import '../models/post.dart';
 import '../models/user.dart';
 
+class EditPostDialog extends StatefulWidget {
+  final Post post;
+
+  const EditPostDialog({super.key, required this.post});
+
+  @override
+  State<EditPostDialog> createState() => _EditPostDialogState();
+}
+
+class _EditPostDialogState extends State<EditPostDialog> {
+  late TextEditingController _contentController;
+  late TextEditingController _imageUrlController;
+
+  @override
+  void initState() {
+    super.initState();
+    _contentController = TextEditingController(text: widget.post.content);
+    _imageUrlController = TextEditingController(text: widget.post.imageUrl);
+  }
+
+  @override
+  void dispose() {
+    _contentController.dispose();
+    _imageUrlController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Modifier la publication'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _contentController,
+              decoration: const InputDecoration(
+                labelText: 'Contenu',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _imageUrlController,
+              decoration: const InputDecoration(
+                labelText: 'URL de l\'image (optionnel)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Annuler'),
+        ),
+        TextButton(
+          onPressed: () {
+            context.read<PostBloc>().add(
+                  UpdatePost(
+                    postId: widget.post.id,
+                    content: _contentController.text,
+                    imageUrl: _imageUrlController.text.isEmpty
+                        ? null
+                        : _imageUrlController.text,
+                  ),
+                );
+            Navigator.pop(context);
+          },
+          child: const Text('Enregistrer'),
+        ),
+      ],
+    );
+  }
+}
 
 class PostWidget extends StatelessWidget {
   final Post post;
+  final bool isProfileScreen;
 
-  const PostWidget({required this.post, super.key, required bool isProfileScreen});
+  const PostWidget({
+    required this.post,
+    required this.isProfileScreen,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +120,6 @@ class PostWidget extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Section de l'utilisateur avec navigation
                     Row(
                       children: [
                         GestureDetector(
@@ -44,12 +127,15 @@ class PostWidget extends StatelessWidget {
                             final user = User(
                               id: post.author.id,
                               username: post.author.username,
-                              avatar: post.author.avatar, description: '', email: ''
+                              avatar: post.author.avatar,
+                              description: '',
+                              email: '',
                             );
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ProfilePostScreen(user: user),
+                                builder: (context) =>
+                                    ProfilePostScreen(user: user),
                               ),
                             );
                           },
@@ -68,14 +154,15 @@ class PostWidget extends StatelessWidget {
                             final user = User(
                               id: post.author.id,
                               username: post.author.username,
-                              email: 'email@example.com', // Exemple
-                              description: 'User description', // Exemple
+                              email: 'email@example.com',
+                              description: 'User description',
                               avatar: post.author.avatar,
                             );
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ProfilePostScreen(user: user),
+                                builder: (context) =>
+                                    ProfilePostScreen(user: user),
                               ),
                             );
                           },
@@ -101,14 +188,17 @@ class PostWidget extends StatelessWidget {
                         ),
                       ],
                     ),
-                    // Options de modification ou suppression
                     if (isUserPost)
                       Row(
                         children: [
                           IconButton(
                             icon: const Icon(Icons.edit, color: Colors.blue),
                             onPressed: () {
-                              // Action pour éditer le post
+                              showDialog(
+                                context: context,
+                                builder: (context) =>
+                                    EditPostDialog(post: post),
+                              );
                             },
                           ),
                           IconButton(
@@ -118,7 +208,8 @@ class PostWidget extends StatelessWidget {
                                 context: context,
                                 builder: (context) => AlertDialog(
                                   title: const Text('Supprimer la publication'),
-                                  content: const Text('Vous confirmez la suppression?'),
+                                  content: const Text(
+                                      'Vous confirmez la suppression?'),
                                   actions: [
                                     TextButton(
                                       onPressed: () => Navigator.pop(context),
@@ -146,7 +237,6 @@ class PostWidget extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
-                // Contenu du post
                 Text(
                   post.content,
                   style: const TextStyle(fontSize: 16),
@@ -175,7 +265,6 @@ class PostWidget extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: 8),
-                // Boutons Like et Comment
                 Row(
                   children: [
                     InkWell(
@@ -235,13 +324,13 @@ class PostWidget extends StatelessWidget {
     final difference = now.difference(date);
 
     if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
+      return "Il y'a ${difference.inDays} jours";
     } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
+      return "Il y'a ${difference.inHours} heures";
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
+      return "Il y'a ${difference.inMinutes} minutes";
     } else {
-      return 'Just now';
+      return 'Maintenant';
     }
   }
 }
