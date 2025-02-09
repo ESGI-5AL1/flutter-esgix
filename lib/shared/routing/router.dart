@@ -1,18 +1,19 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-
 import '../../create_post_screen/create_post_screen.dart';
 import '../../feed_screen/feed_screen.dart';
 import '../../login_screen/login_bloc/login_bloc.dart';
 import '../../login_screen/login_screen.dart';
+import '../../post_comments_screen/post_comments_screen.dart';
 import '../../profile_screen/profile_post_screen.dart';
 import '../../profile_screen/profile_screen.dart';
 import '../../register_screen/register_bloc/register_bloc.dart';
 import '../../register_screen/register_screen.dart';
-import '../../post_comments_screen/post_comments_screen.dart';
 import '../bloc/post_widget_bloc/post_widget_bloc.dart';
+import '../datasources/posts_data_source/posts_remote_data_source.dart';
 import '../models/user.dart';
+import '../repositories/posts_repository/posts_repository.dart';
 
 final router = GoRouter(
   initialLocation: '/login',
@@ -57,8 +58,12 @@ final router = GoRouter(
       path: '/post/:postId/comments',
       builder: (context, state) {
         final postId = state.pathParameters['postId']!;
+        final dio = Dio();
+        final postDataSource = PostRemoteDataSource(dio: dio);
+        final postRepository = PostRepository(remoteDataSource: postDataSource);
+
         return BlocProvider(
-          create: (context) => PostBloc(dio: Dio()),
+          create: (context) => PostBloc(repository: postRepository),
           child: PostCommentsScreen(postId: postId),
         );
       },
@@ -70,6 +75,5 @@ final router = GoRouter(
         return ProfilePostScreen(user: user);
       },
     ),
-
   ],
 );
