@@ -1,4 +1,5 @@
 import '../../models/post.dart';
+import '../../models/user.dart';
 
 abstract class PostDataSource {
   Future<List<Post>> getPosts();
@@ -18,6 +19,8 @@ abstract class PostDataSource {
   Future<List<Post>> getComments(String postId);
 
   Future<Post> getPostById(String postId);
+
+  Future<List<User>> getUsersWhoLikedPost(String postId);
 
   Future<List<Post>> searchPosts(String query);
 }

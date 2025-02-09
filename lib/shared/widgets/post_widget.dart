@@ -4,11 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../login_screen/login_bloc/login_bloc.dart';
+import '../../profile_screen/profile_bloc/profile_bloc.dart';
 import '../../profile_screen/profile_post_screen.dart';
 import '../bloc/post_widget_bloc/post_widget_bloc.dart';
 import '../bloc/post_widget_bloc/post_widget_event.dart';
 import '../models/post.dart';
 import '../models/user.dart';
+import '../repositories/posts_repository/posts_repository.dart';
+import 'likes_user_dialog.dart';
 
 
 
@@ -215,9 +218,7 @@ class PostWidget extends StatelessWidget {
                                     ),
                                     TextButton(
                                       onPressed: () {
-                                        context
-                                            .read<PostBloc>()
-                                            .add(DeletePost(post.id));
+                                        context.read<PostBloc>().add(DeletePost(post.id));
                                         Navigator.pop(context);
                                       },
                                       child: const Text(
@@ -265,32 +266,41 @@ class PostWidget extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    InkWell(
-                      onTap: () {
-                        context.read<PostBloc>().add(LikePost(post.id));
-                      },
-                      child: Row(
-                        children: [
-                          TextButton.icon(
-                            onPressed: () {
-                              context.read<PostBloc>().add(LikePost(post.id));
-                            },
-                            icon: Icon(
-                              post.likedByUser ? Icons.favorite : Icons.favorite_border,
+                    Row(
+                      children: [
+                        TextButton.icon(
+                          onPressed: () {
+                            context.read<PostBloc>().add(LikePost(post.id));
+                          },
+                          icon: Icon(
+                            post.likedByUser ? Icons.favorite : Icons.favorite_border,
+                            color: post.likedByUser ? Colors.red : Colors.grey,
+                          ),
+                          label: Text(
+                            post.likesCount.toString(),
+                            style: TextStyle(
                               color: post.likedByUser ? Colors.red : Colors.grey,
                             ),
-                            label: Text(
-                              post.likesCount.toString(),
-                              style: TextStyle(
-                                color: post.likedByUser ? Colors.red : Colors.grey,
-                              ),
-                            ),
                           ),
-                        ],
-                      ),
+                        ),
+                        if (post.likesCount > 0)
+                          IconButton(
+                            icon: const Icon(Icons.people_outline),
+                            iconSize: 20,
+                            color: Colors.grey,
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => LikesUsersDialog(
+                                  postId: post.id,
+                                  repository: context.read<PostRepository>(),
+                                ),
+                              );
+                            },
+                          ),
+                      ],
                     ),
                     const SizedBox(width: 24),
-                    // View comments button
                     GestureDetector(
                       onTap: () {
                         context.push('/post/${post.id}/comments');
@@ -311,7 +321,6 @@ class PostWidget extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 24),
-                    // Reply button
                     InkWell(
                       onTap: () {
                         showDialog(
