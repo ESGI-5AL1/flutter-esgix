@@ -88,11 +88,12 @@ class PostRemoteDataSource implements PostDataSource {
   }
 
   @override
-  Future<Post?> createPost(String content, String? imageUrl) async {
+  Future<Post?> createPost(String content, String? imageUrl, {String? parent}) async {
     try {
       final Map<String, dynamic> requestBody = {
         'content': content,
         if (imageUrl != null) 'imageUrl': imageUrl,
+        if (parent != null) 'parent': parent,
       };
 
       final response = await dio.post(
@@ -101,8 +102,6 @@ class PostRemoteDataSource implements PostDataSource {
         options: await _getRequestOptions(),
       );
 
-
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.data is String) {
           return null;
@@ -110,9 +109,8 @@ class PostRemoteDataSource implements PostDataSource {
         return Post.fromJson(response.data as Map<String, dynamic>);
       }
     } catch (e) {
-      print('Error creating post: $e');
+      print('Error creating post/comment: $e');
     }
-
     return null;
   }
 

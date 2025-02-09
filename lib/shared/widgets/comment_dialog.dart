@@ -1,50 +1,46 @@
-import 'package:flutter/cupertino.dart';
+// lib/shared/widgets/comment_dialog.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import '../models/post.dart';
 import '../bloc/post_widget_bloc/post_widget_bloc.dart';
 import '../bloc/post_widget_bloc/post_widget_event.dart';
-import '../models/post.dart';
 
 class CommentDialog extends StatefulWidget {
   final Post post;
 
-  const CommentDialog({
-    super.key,
-    required this.post,
-  });
+  const CommentDialog({super.key, required this.post});
 
   @override
   State<CommentDialog> createState() => _CommentDialogState();
 }
 
 class _CommentDialogState extends State<CommentDialog> {
-  final _contentController = TextEditingController();
+  final TextEditingController _commentController = TextEditingController();
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
-    _contentController.dispose();
+    _commentController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Répondre'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _contentController,
-              decoration: const InputDecoration(
-                labelText: '...',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
+      title: const Text('Ajouter un commentaire'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _commentController,
+            decoration: const InputDecoration(
+              hintText: 'Écrivez votre commentaire...',
+              border: OutlineInputBorder(),
             ),
-          ],
-        ),
+            maxLines: 3,
+          ),
+        ],
       ),
       actions: [
         TextButton(
@@ -52,18 +48,31 @@ class _CommentDialogState extends State<CommentDialog> {
           child: const Text('Annuler'),
         ),
         TextButton(
-          onPressed: () {
-            if (_contentController.text.isNotEmpty) {
-              context.read<PostBloc>().add(
-                CreateComment(
-                  _contentController.text,
-                  widget.post.id,
-                ),
-              );
-              Navigator.pop(context);
-            }
+          onPressed: _isSubmitting
+              ? null
+              : () async {
+            if (_commentController.text.trim().isEmpty) return;
+
+            setState(() => _isSubmitting = true);
+
+            context.read<PostBloc>().add(
+              CreateComment(
+                _commentController.text.trim(),
+                widget.post.id,
+              ),
+            );
+
+            context.read<PostBloc>().add(FetchPosts());
+
+            Navigator.pop(context);
           },
-          child: const Text('Poster'),
+          child: _isSubmitting
+              ? const SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          )
+              : const Text('Commenter'),
         ),
       ],
     );

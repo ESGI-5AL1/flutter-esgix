@@ -319,15 +319,15 @@ class PostWidget extends StatelessWidget {
                           builder: (context) => CommentDialog(post: post),
                         );
                       },
-                      child: Row(
+                      child: const Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.reply,
                             color: Colors.blue,
                             size: 20,
                           ),
-                          const SizedBox(width: 4),
-                          const Text(
+                          SizedBox(width: 4),
+                          Text(
                             'Répondre',
                             style: TextStyle(
                               color: Colors.blue,

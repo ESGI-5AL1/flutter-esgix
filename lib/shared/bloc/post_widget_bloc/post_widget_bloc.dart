@@ -22,6 +22,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     on<FetchUserPosts>(_onFetchUserPosts);
     on<FetchUserLikes>(_onFetchUserLikes);
     on<LikePost>(_onLikePost);
+    on<CreateComment>(_onCreateComment);
+
   }
 
   Future<void> _onFetchPosts(FetchPosts event, Emitter<PostState> emit) async {
@@ -92,6 +94,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
   Future<void> _onDeletePost(DeletePost event, Emitter<PostState> emit) async {
     try {
       await repository.deletePost(event.postId);
+
       if (state is PostLoaded) {
         final currentState = state as PostLoaded;
         final updatedPosts = currentState.posts
@@ -99,6 +102,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
             .toList();
         emit(PostLoaded(updatedPosts));
       }
+
+      add(FetchPosts());
     } catch (error) {
       emit(PostError(error.toString()));
     }
@@ -184,6 +189,37 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       emit(PostLoaded(updatedPosts));
     }
   }
+
+  Future<void> _onCreateComment(CreateComment event, Emitter<PostState> emit) async {
+    try {
+      final comment = await repository.createPost(
+          event.content,
+          null,
+          parent: event.parentId
+      );
+
+      if (comment != null && state is PostLoaded) {
+        final currentState = state as PostLoaded;
+        final updatedPosts = currentState.posts.map((post) {
+          if (post.id == event.parentId) {
+            return post.copyWith(
+              commentsCount: post.commentsCount + 1,
+            );
+          }
+          return post;
+        }).toList();
+
+        if (currentState.posts.any((post) => post.parent == event.parentId)) {
+          updatedPosts.add(comment);
+        }
+
+        emit(PostLoaded(updatedPosts));
+      }
+    } catch (error) {
+      emit(PostError(error.toString()));
+    }
+  }
+
 
 
 }
