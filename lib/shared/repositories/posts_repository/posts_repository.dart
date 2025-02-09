@@ -1,5 +1,6 @@
 import '../../datasources/posts_data_source/posts_data_source.dart';
 import '../../models/post.dart';
+import '../../models/user.dart';
 
 class PostRepository {
   final PostDataSource remoteDataSource;
@@ -93,6 +94,14 @@ class PostRepository {
       return await remoteDataSource.createPost(content, null, parent: parentId);
     } catch (e) {
       throw Exception('Repository: Failed to create comment: $e');
+    }
+  }
+
+  Future<List<User>> getUsersWhoLikedPost(String postId) async {
+    try {
+      return await remoteDataSource.getUsersWhoLikedPost(postId);
+    } catch (e) {
+      throw Exception('Repository: Failed to fetch users who liked post: $e');
     }
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/author.dart';
 import '../../models/post.dart';
+import '../../models/user.dart';
 
 class PostRemoteDataSource implements PostDataSource {
   final Dio dio;
@@ -233,6 +234,28 @@ class PostRemoteDataSource implements PostDataSource {
       throw Exception('Failed to search posts');
     } catch (e) {
       throw Exception('Failed to search posts: $e');
+    }
+  }
+
+  @override
+  Future<List<User>> getUsersWhoLikedPost(String postId) async {
+    try {
+      final response = await dio.get(
+        '$baseUrl/likes/$postId/users',
+        options: await _getRequestOptions(),
+      );
+
+      if (response.statusCode == 200) {
+        final List usersList = response.data as List;
+        return usersList.map((json) => User.fromJson({
+          ...json as Map<String, dynamic>,
+          'email': '',
+          'description': '',
+        })).toList();
+      }
+      throw Exception('Failed to fetch users who liked post');
+    } catch (e) {
+      throw Exception('Failed to fetch users who liked post: $e');
     }
   }
 }
