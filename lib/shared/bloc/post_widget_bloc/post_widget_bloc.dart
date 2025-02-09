@@ -23,6 +23,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     on<FetchUserLikes>(_onFetchUserLikes);
     on<LikePost>(_onLikePost);
     on<CreateComment>(_onCreateComment);
+    on<LoadProfileData>(_onLoadProfileData);
 
   }
 
@@ -220,7 +221,17 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     }
   }
 
-
+  Future<void> _onLoadProfileData(LoadProfileData event, Emitter<PostState> emit) async {
+    emit(PostLoading());
+    try {
+      final posts = event.loadLikes
+          ? await repository.getUserLikes(event.userId)
+          : await repository.getUserPosts(event.userId);
+      emit(PostLoaded(posts));
+    } catch (error) {
+      emit(PostError(error.toString()));
+    }
+  }
 
 }
 

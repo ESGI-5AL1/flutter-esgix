@@ -88,3 +88,13 @@ class FetchUserLikes extends PostEvent {
 
   FetchUserLikes({required this.userId});
 }
+
+class LoadProfileData extends PostEvent {
+  final String userId;
+  final bool loadLikes;
+
+  LoadProfileData({
+    required this.userId,
+    required this.loadLikes,
+  });
+}
