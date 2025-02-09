@@ -211,7 +211,7 @@ class PostRemoteDataSource implements PostDataSource {
       );
 
       if (response.statusCode == 200) {
-        return Post.fromJson(response.data['data']);
+        return Post.fromJson(response.data);
       }
       throw Exception('Failed to fetch post');
     } catch (e) {

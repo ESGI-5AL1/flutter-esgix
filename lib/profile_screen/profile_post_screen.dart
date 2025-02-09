@@ -16,7 +16,7 @@ class ProfilePostScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Charger les posts lors de l'ouverture de l'écran
+
     context.read<PostBloc>().add(FetchPosts());
 
     return Scaffold(

@@ -7,74 +7,103 @@ import '../shared/models/author.dart';
 import '../shared/widgets/post_widget.dart';
 import '../shared/models/post.dart';
 
-class PostCommentsScreen extends StatelessWidget {
+class PostCommentsScreen extends StatefulWidget {
   final String postId;
 
   const PostCommentsScreen({super.key, required this.postId});
 
   @override
-  Widget build(BuildContext context) {
-    final postBloc = context.read<PostBloc>();
+  PostCommentsScreenState createState() => PostCommentsScreenState();
+}
 
-    if (postId.isNotEmpty) {
-      postBloc.add(FetchPostById(postId: postId));
-      postBloc.add(FetchComments(postId: postId));
+class PostCommentsScreenState extends State<PostCommentsScreen> {
+  late PostBloc postBloc;
+  bool commentsLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    postBloc = context.read<PostBloc>();
+
+    if (widget.postId.isNotEmpty) {
+      postBloc.add(FetchPostById(postId: widget.postId));
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Post and Comments'),
-      ),
-      body: BlocBuilder<PostBloc, PostState>(
-        builder: (context, state) {
-          if (state is PostLoading) {
-            return Center(child: CircularProgressIndicator());
-          } else if (state is PostLoaded) {
-            final post = state.posts.firstWhere(
-                  (p) => p.id == postId,
-              orElse: () => Post(
-                id: '',
-                content: '',
-                imageUrl: '',
-                likesCount: 0,
-                commentsCount: 0,
-                parent: '',
-                author: Author(id: '', username: '', avatar: ''),
-                likedByUser: false,
-                createdAt: '',
-                updatedAt: '',
-              ),
-            );
-
-            final comments = state.posts.where((p) => p.parent == postId).toList();
-
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Display the post or a message if not found
-                    if (post.id.isEmpty)
-                      Center(child: Text('Post not found.'))
-                    else
-                      PostWidget(post: post, isProfileScreen: false,),
-                    const SizedBox(height: 16),
-                    // Display the comments
-                    ...comments.map((comment) => Padding(
-                      padding: const EdgeInsets.only(left: 16.0),
-                      child: PostWidget(post: comment, isProfileScreen: false,),
-                    )),
-                  ],
-                ),
-              ),
-            );
-          } else if (state is PostError) {
-            return Center(child: Text('Failed to load post and comments.'));
-          } else {
-            return Center(child: Text('Failed to load comments.'));
+      appBar: AppBar(title: Text('Post and Comments')),
+      body: BlocListener<PostBloc, PostState>(
+        listener: (context, state) {
+          if (state is PostLoaded) {
+            final postExists = state.posts.any((p) => p.id == widget.postId);
+            if (postExists && !commentsLoaded) {
+              postBloc.add(FetchComments(postId: widget.postId));
+              commentsLoaded = true; // Empêcher le rechargement multiple
+            }
           }
         },
+        child: BlocBuilder<PostBloc, PostState>(
+          builder: (context, state) {
+            if (state is PostLoading) {
+              return Center(child: CircularProgressIndicator());
+            } else if (state is PostLoaded) {
+              final post = state.posts.firstWhere(
+                    (p) => p.id == widget.postId,
+                orElse: () => Post(
+                  id: '',
+                  content: '',
+                  imageUrl: '',
+                  likesCount: 0,
+                  commentsCount: 0,
+                  parent: '',
+                  author: Author(id: '', username: '', avatar: ''),
+                  likedByUser: false,
+                  createdAt: '',
+                  updatedAt: '',
+                ),
+              );
+
+              final comments = state.posts.where((p) => p.parent == widget.postId).toList();
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Post parent affiché en haut, ne bouge pas
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: post.id.isEmpty
+                        ? Center(child: Text('Post not found.'))
+                        : PostWidget(post: post, isProfileScreen: false),
+                  ),
+
+                  const Divider(),
+
+                  // Zone scrollable uniquement pour les commentaires
+                  Expanded(
+                    child: comments.isEmpty
+                        ? Center(child: Text('No comments yet.'))
+                        : ListView.builder(
+                      itemCount: comments.length,
+                      itemBuilder: (context, index) {
+                        final comment = comments[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 32.0, right: 16.0, bottom: 8.0), // Décalage des commentaires
+                          child: PostWidget(post: comment, isProfileScreen: false),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              );
+            } else if (state is PostError) {
+              return Center(child: Text('Failed to load post and comments.'));
+            } else {
+              return Center(child: Text('Something went wrong.'));
+            }
+          },
+        ),
       ),
     );
   }
