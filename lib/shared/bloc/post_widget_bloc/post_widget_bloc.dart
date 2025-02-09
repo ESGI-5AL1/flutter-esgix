@@ -94,6 +94,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
   Future<void> _onDeletePost(DeletePost event, Emitter<PostState> emit) async {
     try {
       await repository.deletePost(event.postId);
+
       if (state is PostLoaded) {
         final currentState = state as PostLoaded;
         final updatedPosts = currentState.posts
@@ -101,6 +102,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
             .toList();
         emit(PostLoaded(updatedPosts));
       }
+
+      add(FetchPosts());
     } catch (error) {
       emit(PostError(error.toString()));
     }
@@ -197,7 +200,6 @@ class PostBloc extends Bloc<PostEvent, PostState> {
 
       if (comment != null && state is PostLoaded) {
         final currentState = state as PostLoaded;
-        // Met à jour le compteur de commentaires du post parent
         final updatedPosts = currentState.posts.map((post) {
           if (post.id == event.parentId) {
             return post.copyWith(
@@ -207,7 +209,6 @@ class PostBloc extends Bloc<PostEvent, PostState> {
           return post;
         }).toList();
 
-        // Ajoute le nouveau commentaire à la liste si on est sur la page des commentaires
         if (currentState.posts.any((post) => post.parent == event.parentId)) {
           updatedPosts.add(comment);
         }
