@@ -1,5 +1,6 @@
-import 'package:esgix/profile_screen/profile_bloc/profile_bloc.dart';
+import 'package:esgix/shared/datasources/user_data_source/user_remote_data_source.dart';
 import 'package:esgix/shared/repositories/posts_repository/posts_repository.dart';
+import 'package:esgix/shared/repositories/user_repository/user_repository.dart';
 import 'package:esgix/shared/routing/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,9 +26,18 @@ class MyApp extends StatelessWidget {
     final dio = Dio();
     final postDataSource = PostRemoteDataSource(dio: dio);
     final postRepository = PostRepository(remoteDataSource: postDataSource);
+    final userDataSource = UserRemoteDataSource(dio: dio);
+    final userRepository = UserRepository(remoteDataSource: userDataSource);
 
-    return Provider<PostRepository>(
-      create: (context) => postRepository,
+    return MultiProvider(
+      providers: [
+        Provider<PostRepository>(
+          create: (context) => postRepository,
+        ),
+        Provider<UserRepository>(
+          create: (context) => userRepository,
+        ),
+      ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
@@ -39,7 +49,9 @@ class MyApp extends StatelessWidget {
             ),
           ),
           BlocProvider(
-            create: (context) => UserBloc(dio: dio),
+            create: (context) => UserBloc(
+              repository: context.read<UserRepository>(),
+            ),
           ),
         ],
         child: MaterialApp.router(

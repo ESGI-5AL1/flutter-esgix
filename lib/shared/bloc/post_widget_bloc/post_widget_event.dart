@@ -98,3 +98,12 @@ class LoadProfileData extends PostEvent {
     required this.loadLikes,
   });
 }
+
+class SyncLikeStatus extends PostEvent {
+  final String postId;
+  final bool isLiked;
+
+  SyncLikeStatus(this.postId, this.isLiked);
+
+  List<Object> get props => [postId, isLiked];
+}

@@ -40,7 +40,7 @@ class PostCommentsScreenState extends State<PostCommentsScreen> {
             final postExists = state.posts.any((p) => p.id == widget.postId);
             if (postExists && !commentsLoaded) {
               postBloc.add(FetchComments(postId: widget.postId));
-              commentsLoaded = true; // Empêcher le chargement multiple des commentaires
+              commentsLoaded = true;
             }
           }
         },

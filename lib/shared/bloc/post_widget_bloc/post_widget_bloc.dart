@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:esgix/shared/bloc/post_widget_bloc/post_widget_event.dart';
 import 'package:esgix/shared/bloc/post_widget_bloc/post_widget_state.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../../../login_screen/login_bloc/login_bloc.dart';
 import '../../models/post.dart';
 import '../../repositories/posts_repository/posts_repository.dart';
 
@@ -24,14 +25,28 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     on<LikePost>(_onLikePost);
     on<CreateComment>(_onCreateComment);
     on<LoadProfileData>(_onLoadProfileData);
-
+    on<SyncLikeStatus>(_onSyncLikeStatus);
   }
 
   Future<void> _onFetchPosts(FetchPosts event, Emitter<PostState> emit) async {
     emit(PostLoading());
     try {
       final posts = await repository.getPosts();
-      emit(PostLoaded(posts));
+      final userId = await LoginBloc.getUserId();
+      if (userId != null) {
+        final userLikes = await repository.getUserLikes(userId);
+        final likedPostIds = userLikes.map((post) => post.id).toSet();
+
+        final updatedPosts = posts.map((post) {
+          return post.copyWith(
+            likedByUser: likedPostIds.contains(post.id),
+          );
+        }).toList();
+
+        emit(PostLoaded(updatedPosts));
+      } else {
+        emit(PostLoaded(posts));
+      }
     } catch (error) {
       emit(PostError(error.toString()));
     }
@@ -47,11 +62,25 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     }
   }
 
+  Future<void> _onSyncLikeStatus(SyncLikeStatus event, Emitter<PostState> emit) async {
+    if (state is PostLoaded) {
+      final currentState = state as PostLoaded;
+      final updatedPosts = currentState.posts.map((post) {
+        if (post.id == event.postId) {
+          return post.copyWith(likedByUser: event.isLiked);
+        }
+        return post;
+      }).toList();
+      emit(PostLoaded(updatedPosts));
+    }
+  }
+
   Future<void> _onFetchUserLikes(FetchUserLikes event, Emitter<PostState> emit) async {
     emit(PostLoading());
     try {
       final posts = await repository.getUserLikes(event.userId);
-      emit(PostLoaded(posts));
+      final updatedPosts = posts.map((post) => post.copyWith(likedByUser: true)).toList();
+      emit(PostLoaded(updatedPosts));
     } catch (error) {
       emit(PostError(error.toString()));
     }
@@ -116,6 +145,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
 
     try {
       await repository.likePost(event.postId);
+
+      // Mettre à jour tous les posts qui ont le même ID
       final updatedPosts = currentState.posts.map((post) {
         if (post.id == event.postId) {
           return post.copyWith(
@@ -127,6 +158,9 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       }).toList();
 
       emit(PostLoaded(updatedPosts));
+
+      // Émettre un événement pour mettre à jour les autres vues
+      add(SyncLikeStatus(event.postId, !currentState.posts.firstWhere((p) => p.id == event.postId).likedByUser));
     } catch (error) {
       emit(PostError(error.toString()));
       emit(currentState);
