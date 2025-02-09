@@ -30,9 +30,9 @@ class PostRepository {
     }
   }
 
-  Future<Post?> createPost(String content, String? imageUrl) async {
+  Future<Post?> createPost(String content, String? imageUrl, {String? parent}) async {
     try {
-      return await remoteDataSource.createPost(content, imageUrl);
+      return await remoteDataSource.createPost(content, imageUrl, parent: parent);
     } catch (e) {
       throw Exception('Repository: Failed to create post: $e');
     }
@@ -84,6 +84,15 @@ class PostRepository {
       return await remoteDataSource.searchPosts(query);
     } catch (e) {
       throw Exception('Repository: Failed to search posts: $e');
+    }
+  }
+
+  // Dans posts_repository.dart
+  Future<Post?> createComment(String content, String parentId) async {
+    try {
+      return await remoteDataSource.createPost(content, null, parent: parentId);
+    } catch (e) {
+      throw Exception('Repository: Failed to create comment: $e');
     }
   }
 }

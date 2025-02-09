@@ -22,6 +22,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     on<FetchUserPosts>(_onFetchUserPosts);
     on<FetchUserLikes>(_onFetchUserLikes);
     on<LikePost>(_onLikePost);
+    on<CreateComment>(_onCreateComment);
+
   }
 
   Future<void> _onFetchPosts(FetchPosts event, Emitter<PostState> emit) async {
@@ -184,6 +186,39 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       emit(PostLoaded(updatedPosts));
     }
   }
+
+  Future<void> _onCreateComment(CreateComment event, Emitter<PostState> emit) async {
+    try {
+      final comment = await repository.createPost(
+          event.content,
+          null,
+          parent: event.parentId
+      );
+
+      if (comment != null && state is PostLoaded) {
+        final currentState = state as PostLoaded;
+        // Met à jour le compteur de commentaires du post parent
+        final updatedPosts = currentState.posts.map((post) {
+          if (post.id == event.parentId) {
+            return post.copyWith(
+              commentsCount: post.commentsCount + 1,
+            );
+          }
+          return post;
+        }).toList();
+
+        // Ajoute le nouveau commentaire à la liste si on est sur la page des commentaires
+        if (currentState.posts.any((post) => post.parent == event.parentId)) {
+          updatedPosts.add(comment);
+        }
+
+        emit(PostLoaded(updatedPosts));
+      }
+    } catch (error) {
+      emit(PostError(error.toString()));
+    }
+  }
+
 
 
 }
