@@ -1,9 +1,11 @@
+import 'package:esgix/profile_screen/profile_bloc/profile_bloc.dart';
 import 'package:esgix/shared/repositories/posts_repository/posts_repository.dart';
 import 'package:esgix/shared/routing/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:dio/dio.dart';
+import 'package:provider/provider.dart';
 
 import 'login_screen/login_bloc/login_bloc.dart';
 import 'shared/bloc/post_widget_bloc/post_widget_bloc.dart';
@@ -24,23 +26,28 @@ class MyApp extends StatelessWidget {
     final postDataSource = PostRemoteDataSource(dio: dio);
     final postRepository = PostRepository(remoteDataSource: postDataSource);
 
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => LoginBloc(),
-        ),
-        BlocProvider(
-          create: (context) => PostBloc(repository: postRepository),
-        ),
-        BlocProvider(
-          create: (context) => UserBloc(dio: dio),
-        ),
-      ],
-      child: MaterialApp.router(
-        title: 'ESGIX',
-        routerConfig: router,
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
+    return Provider<PostRepository>(
+      create: (context) => postRepository,
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => LoginBloc(),
+          ),
+          BlocProvider(
+            create: (context) => PostBloc(
+              repository: context.read<PostRepository>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => UserBloc(dio: dio),
+          ),
+        ],
+        child: MaterialApp.router(
+          title: 'ESGIX',
+          routerConfig: router,
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
         ),
       ),
     );

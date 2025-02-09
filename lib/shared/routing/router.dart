@@ -72,7 +72,14 @@ final router = GoRouter(
       path: '/profile-post',
       builder: (context, state) {
         final user = state.extra as User;
-        return ProfilePostScreen(user: user);
+        final dio = Dio();
+        final postDataSource = PostRemoteDataSource(dio: dio);
+        final postRepository = PostRepository(remoteDataSource: postDataSource);
+
+        return BlocProvider(
+          create: (context) => PostBloc(repository: postRepository),
+          child: ProfilePostScreen(user: user),
+        );
       },
     ),
   ],
