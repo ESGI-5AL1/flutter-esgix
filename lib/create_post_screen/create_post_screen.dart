@@ -28,7 +28,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Post'),
+        title: const Text('Créer un post'),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => context.go('/feed'),

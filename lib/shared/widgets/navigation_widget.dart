@@ -78,7 +78,7 @@ class AppNavigationDrawer extends StatelessWidget {
         ),
         ListTile(
           leading: const Icon(Icons.logout),
-          title: const Text('Logout'),
+          title: const Text('Deconnexion'),
           onTap: () => _handleLogout(context),
         ),
       ],
