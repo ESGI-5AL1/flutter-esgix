@@ -45,12 +45,34 @@ class _ProfilePostScreenContent extends StatelessWidget {
             height: MediaQuery.of(context).size.height * 0.25,
             color: Colors.grey[200],
             child: Center(
-              child: CircleAvatar(
-                radius: 50,
-                backgroundImage: user.avatar.isNotEmpty
-                    ? NetworkImage(user.avatar)
-                    : null,
-                child: user.avatar.isEmpty ? const Icon(Icons.person, size: 50) : null,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundImage:
+                    user.avatar.isNotEmpty ? NetworkImage(user.avatar) : null,
+                    child: user.avatar.isEmpty
+                        ? const Icon(Icons.person, size: 50)
+                        : null,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    user.username,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      user.description ?? "No description available",
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      textAlign: TextAlign.center,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

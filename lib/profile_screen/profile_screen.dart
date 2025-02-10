@@ -58,7 +58,6 @@ class _UserProfileScreenState extends State<ProfileScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (_isEditing) ...[
-            // Avatar URL field
             TextFormField(
               controller: _avatarController,
               decoration: const InputDecoration(
@@ -102,8 +101,7 @@ class _UserProfileScreenState extends State<ProfileScreen> {
               },
               child: const Text('Save Changes'),
             ),
-          ] else ...[
-            // Display mode
+           ] else ...[
             CircleAvatar(
               radius: 50,
               backgroundImage:
@@ -117,16 +115,15 @@ class _UserProfileScreenState extends State<ProfileScreen> {
               user.username,
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            if (user.description.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                user.description,
+                user.description.isNotEmpty ? user.description : "" ,
                 style: Theme.of(context).textTheme.bodyLarge,
                 textAlign: TextAlign.center,
               ),
             ],
           ],
-        ],
+
       ),
     );
   }
@@ -250,7 +247,6 @@ class _UserProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-// Méthode pour afficher la liste des posts
 Widget _buildPostList(List<Post> posts) {
   if (posts.isEmpty) {
     return const Center(child: Text("No posts available."));
