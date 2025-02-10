@@ -67,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextUserInput(
                   controller: _passwordController,
                   elementWidthFactor: 0.8,
-                  hintText: 'Password',
+                  hintText: 'Mot de passe',
                   prefixIcon: const Icon(Icons.lock_outline),
                   isPassword: true,
                 ),
@@ -83,14 +83,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: state is LoginLoading
                             ? null
                             : () {
-                          FocusScope.of(context).unfocus();
-                          context.read<LoginBloc>().add(
-                            LoginSubmitted(
-                              email: _emailController.text,
-                              password: _passwordController.text,
-                            ),
-                          );
-                        },
+                                FocusScope.of(context).unfocus();
+                                context.read<LoginBloc>().add(
+                                      LoginSubmitted(
+                                        email: _emailController.text,
+                                        password: _passwordController.text,
+                                      ),
+                                    );
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
                           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -100,21 +100,22 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         child: state is LoginLoading
                             ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            strokeWidth: 2,
-                          ),
-                        )
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                  strokeWidth: 2,
+                                ),
+                              )
                             : const Text(
-                          'Login',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                                'Login',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                     );
                   },
@@ -126,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextButton(
                   onPressed: () => context.go('/register'),
                   child: const Text(
-                    'Create an account',
+                    'Créer un compte',
                     style: TextStyle(
                       color: Colors.blue,
                       fontWeight: FontWeight.w500,

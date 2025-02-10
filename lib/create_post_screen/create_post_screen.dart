@@ -71,18 +71,18 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 onPressed: _isLoading
                     ? null
                     : () {
-                  if (_contentController.text.isNotEmpty) {
-                    setState(() => _isLoading = true);
-                    context.read<PostBloc>().add(
-                      CreatePost(
-                        content: _contentController.text,
-                        imageUrl: _imageUrlController.text.isEmpty
-                            ? null
-                            : _imageUrlController.text,
-                      ),
-                    );
-                  }
-                },
+                        if (_contentController.text.isNotEmpty) {
+                          setState(() => _isLoading = true);
+                          context.read<PostBloc>().add(
+                                CreatePost(
+                                  content: _contentController.text,
+                                  imageUrl: _imageUrlController.text.isEmpty
+                                      ? null
+                                      : _imageUrlController.text,
+                                ),
+                              );
+                        }
+                      },
                 child: _isLoading
                     ? const CircularProgressIndicator()
                     : const Text('Post'),

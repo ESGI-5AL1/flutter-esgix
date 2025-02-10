@@ -158,7 +158,7 @@ class PostWidget extends StatelessWidget {
                             final user = User(
                               id: post.author.id,
                               username: post.author.username,
-                              email: 'email@example.com',
+                              email: '',
                               description: '',
                               avatar: post.author.avatar,
                             );

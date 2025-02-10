@@ -53,11 +53,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
         emit(LoginSuccess(token: token));
       } else {
-        emit(LoginFailure('Login failed: ${response.statusCode}'));
+        emit(LoginFailure('Connexion échouée: ${response.statusCode}'));
       }
     } on DioException catch (e) {
       if (e.response != null) {
-        emit(LoginFailure(e.response?.data['message'] ?? 'Login failed'));
+        emit(LoginFailure(e.response?.data['message'] ?? 'Connexion échouée'));
       } else {
         emit(LoginFailure('Network error: ${e.message}'));
       }
@@ -76,7 +76,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       await prefs.remove(_userIdKey);
       emit(LoginInitial());
     } catch (error) {
-      emit(LoginFailure('Failed to logout'));
+      emit(LoginFailure('Deconnexion échouée'));
     }
   }
 
