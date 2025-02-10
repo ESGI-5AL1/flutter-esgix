@@ -17,11 +17,13 @@ class CommentDialog extends StatefulWidget {
 
 class _CommentDialogState extends State<CommentDialog> {
   final TextEditingController _commentController = TextEditingController();
+  final TextEditingController _imageUrlController = TextEditingController();
   bool _isSubmitting = false;
 
   @override
   void dispose() {
     _commentController.dispose();
+    _imageUrlController.dispose();
     super.dispose();
   }
 
@@ -40,6 +42,14 @@ class _CommentDialogState extends State<CommentDialog> {
             ),
             maxLines: 3,
           ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _imageUrlController,
+            decoration: const InputDecoration(
+              hintText: 'URL de l\'image (optionnel)',
+              border: OutlineInputBorder(),
+            ),
+          ),
         ],
       ),
       actions: [
@@ -55,10 +65,13 @@ class _CommentDialogState extends State<CommentDialog> {
 
             setState(() => _isSubmitting = true);
 
+            final imageUrl = _imageUrlController.text.trim();
+
             context.read<PostBloc>().add(
               CreateComment(
                 _commentController.text.trim(),
                 widget.post.id,
+                imageUrl: imageUrl.isNotEmpty ? imageUrl : null,
               ),
             );
 
