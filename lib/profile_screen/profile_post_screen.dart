@@ -63,7 +63,7 @@ class _ProfilePostScreenContent extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Text(
-                      user.id,
+                      user.description,
                       style: Theme.of(context).textTheme.bodyLarge,
                       textAlign: TextAlign.center,
                       maxLines: 3,
