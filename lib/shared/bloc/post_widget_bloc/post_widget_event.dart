@@ -79,8 +79,9 @@ class UpdatePost extends PostEvent {
 class CreateComment extends PostEvent {
   final String content;
   final String parentId;
+  final String? imageUrl;
 
-  CreateComment(this.content, this.parentId);
+  CreateComment(this.content, this.parentId, {this.imageUrl});
 }
 
 class FetchUserLikes extends PostEvent {

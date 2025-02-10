@@ -52,7 +52,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     }
   }
 
-  Future<void> _onFetchUserPosts(FetchUserPosts event, Emitter<PostState> emit) async {
+  Future<void> _onFetchUserPosts(
+      FetchUserPosts event, Emitter<PostState> emit) async {
     emit(PostLoading());
     try {
       final posts = await repository.getUserPosts(event.userId);
@@ -62,7 +63,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     }
   }
 
-  Future<void> _onSyncLikeStatus(SyncLikeStatus event, Emitter<PostState> emit) async {
+  Future<void> _onSyncLikeStatus(
+      SyncLikeStatus event, Emitter<PostState> emit) async {
     if (state is PostLoaded) {
       final currentState = state as PostLoaded;
       final updatedPosts = currentState.posts.map((post) {
@@ -75,11 +77,13 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     }
   }
 
-  Future<void> _onFetchUserLikes(FetchUserLikes event, Emitter<PostState> emit) async {
+  Future<void> _onFetchUserLikes(
+      FetchUserLikes event, Emitter<PostState> emit) async {
     emit(PostLoading());
     try {
       final posts = await repository.getUserLikes(event.userId);
-      final updatedPosts = posts.map((post) => post.copyWith(likedByUser: true)).toList();
+      final updatedPosts =
+          posts.map((post) => post.copyWith(likedByUser: true)).toList();
       emit(PostLoaded(updatedPosts));
     } catch (error) {
       emit(PostError(error.toString()));
@@ -120,7 +124,6 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     }
   }
 
-
   Future<void> _onDeletePost(DeletePost event, Emitter<PostState> emit) async {
     try {
       await repository.deletePost(event.postId);
@@ -151,7 +154,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
         if (post.id == event.postId) {
           return post.copyWith(
             likedByUser: !post.likedByUser,
-            likesCount: post.likedByUser ? post.likesCount - 1 : post.likesCount + 1,
+            likesCount:
+                post.likedByUser ? post.likesCount - 1 : post.likesCount + 1,
           );
         }
         return post;
@@ -160,7 +164,11 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       emit(PostLoaded(updatedPosts));
 
       // Émettre un événement pour mettre à jour les autres vues
-      add(SyncLikeStatus(event.postId, !currentState.posts.firstWhere((p) => p.id == event.postId).likedByUser));
+      add(SyncLikeStatus(
+          event.postId,
+          !currentState.posts
+              .firstWhere((p) => p.id == event.postId)
+              .likedByUser));
     } catch (error) {
       emit(PostError(error.toString()));
       emit(currentState);
@@ -174,12 +182,14 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     }
   }
 
-  Future<void> _onFetchComments(FetchComments event, Emitter<PostState> emit) async {
+  Future<void> _onFetchComments(
+      FetchComments event, Emitter<PostState> emit) async {
     try {
       final comments = await repository.getComments(event.postId);
       if (state is PostLoaded) {
         final currentState = state as PostLoaded;
-        final updatedPosts = List<Post>.from(currentState.posts)..addAll(comments);
+        final updatedPosts = List<Post>.from(currentState.posts)
+          ..addAll(comments);
         emit(PostLoaded(updatedPosts));
       } else {
         emit(PostLoaded(comments));
@@ -189,7 +199,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     }
   }
 
-  Future<void> _onFetchPostById(FetchPostById event, Emitter<PostState> emit) async {
+  Future<void> _onFetchPostById(
+      FetchPostById event, Emitter<PostState> emit) async {
     emit(PostLoading());
     try {
       final post = await repository.getPostById(event.postId);
@@ -199,7 +210,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     }
   }
 
-  Future<void> _onSearchPosts(SearchPosts event, Emitter<PostState> emit) async {
+  Future<void> _onSearchPosts(
+      SearchPosts event, Emitter<PostState> emit) async {
     emit(PostLoading());
     try {
       final posts = await repository.searchPosts(event.query);
@@ -225,13 +237,12 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     }
   }
 
-  Future<void> _onCreateComment(CreateComment event, Emitter<PostState> emit) async {
+  Future<void> _onCreateComment(
+      CreateComment event, Emitter<PostState> emit) async {
     try {
       final comment = await repository.createPost(
-          event.content,
-          null,
-          parent: event.parentId
-      );
+          event.content, event.imageUrl,
+          parent: event.parentId);
 
       if (comment != null && state is PostLoaded) {
         final currentState = state as PostLoaded;
@@ -255,7 +266,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     }
   }
 
-  Future<void> _onLoadProfileData(LoadProfileData event, Emitter<PostState> emit) async {
+  Future<void> _onLoadProfileData(
+      LoadProfileData event, Emitter<PostState> emit) async {
     emit(PostLoading());
     try {
       final posts = event.loadLikes
@@ -266,8 +278,4 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       emit(PostError(error.toString()));
     }
   }
-
 }
-
-
-
