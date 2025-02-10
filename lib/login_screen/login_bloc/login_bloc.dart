@@ -47,18 +47,17 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         final token = response.data['token'];
         final userId = response.data['record']['id'];
 
-        // Save token to SharedPreferences
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(_tokenKey, token);
         await prefs.setString(_userIdKey, userId);
 
         emit(LoginSuccess(token: token));
       } else {
-        emit(LoginFailure('Login failed: ${response.statusCode}'));
+        emit(LoginFailure('Connexion échouée: ${response.statusCode}'));
       }
     } on DioException catch (e) {
       if (e.response != null) {
-        emit(LoginFailure(e.response?.data['message'] ?? 'Login failed'));
+        emit(LoginFailure(e.response?.data['message'] ?? 'Connexion échouée'));
       } else {
         emit(LoginFailure('Network error: ${e.message}'));
       }
@@ -73,16 +72,14 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      // Clear all auth-related data
       await prefs.remove(_tokenKey);
       await prefs.remove(_userIdKey);
       emit(LoginInitial());
     } catch (error) {
-      emit(LoginFailure('Failed to logout'));
+      emit(LoginFailure('Deconnexion échouée'));
     }
   }
 
-  // Helper method to check if user is logged in
   static Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
     final hasToken = prefs.containsKey(_tokenKey);
@@ -90,7 +87,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     return hasToken && hasUserId;
   }
 
-  // Helper method to get token
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_tokenKey);

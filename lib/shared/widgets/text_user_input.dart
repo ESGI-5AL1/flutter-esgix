@@ -33,7 +33,6 @@ class TextUserInput extends StatelessWidget {
             border: const OutlineInputBorder(),
             focusColor: Colors.blue,
             hintText: hintText,
-
           ),
         ),
       ),

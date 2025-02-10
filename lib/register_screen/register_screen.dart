@@ -36,7 +36,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           } else if (state.status == RegisterStatus.error) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Registration failed. Please try again.'),
+                content: Text('Inscription échouée, veuillez réessayer.'),
                 backgroundColor: Colors.red,
               ),
             );
@@ -47,14 +47,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
             builder: (context, constraints) {
               double padding = constraints.maxWidth * 0.1;
               double elementWidthFactor =
-              constraints.maxWidth > 600 ? 0.5 : 0.8;
+                  constraints.maxWidth > 600 ? 0.5 : 0.8;
               return Column(
                 children: [
                   const Flexible(
                     flex: 1,
                     child: Center(
                       child: Text(
-                        'Register',
+                        'S' 'inscrire',
                         style: TextStyle(fontSize: 52, color: Colors.blue),
                       ),
                     ),
@@ -78,7 +78,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             TextUserInput(
                               controller: _passwordController,
                               elementWidthFactor: elementWidthFactor,
-                              hintText: 'password',
+                              hintText: 'mot de passe',
                               prefixIcon: const Icon(Icons.key),
                               isPassword: true,
                             ),
@@ -106,16 +106,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   child: ElevatedButton(
                                     onPressed: () {
                                       context.read<RegisterBloc>().add(
-                                        ExecuteRegister(
-                                          _emailController.text,
-                                          _passwordController.text,
-                                          _usernameController.text,
-                                          _avatarController.text,
-                                        ),
-                                      );
+                                            ExecuteRegister(
+                                              _emailController.text,
+                                              _passwordController.text,
+                                              _usernameController.text,
+                                              _avatarController.text,
+                                            ),
+                                          );
                                     },
                                     child: const Text(
-                                      'Register',
+                                      'Inscription',
                                       style: TextStyle(color: Colors.blue),
                                     ),
                                   ),
@@ -130,7 +130,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     context.go('/login');
                                   },
                                   child: const Text(
-                                    'Login',
+                                    'Connexion',
                                     style: TextStyle(color: Colors.blue),
                                   ),
                                 ),

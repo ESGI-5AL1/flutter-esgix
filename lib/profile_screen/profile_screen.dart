@@ -58,7 +58,6 @@ class _UserProfileScreenState extends State<ProfileScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (_isEditing) ...[
-            // Avatar URL field
             TextFormField(
               controller: _avatarController,
               decoration: const InputDecoration(
@@ -100,10 +99,9 @@ class _UserProfileScreenState extends State<ProfileScreen> {
                     );
                 setState(() => _isEditing = false);
               },
-              child: const Text('Save Changes'),
+              child: const Text('Enregistrer'),
             ),
           ] else ...[
-            // Display mode
             CircleAvatar(
               radius: 50,
               backgroundImage:
@@ -117,14 +115,12 @@ class _UserProfileScreenState extends State<ProfileScreen> {
               user.username,
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            if (user.description.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                user.description,
-                style: Theme.of(context).textTheme.bodyLarge,
-                textAlign: TextAlign.center,
-              ),
-            ],
+            const SizedBox(height: 8),
+            Text(
+              user.description.isNotEmpty ? user.description : "",
+              style: Theme.of(context).textTheme.bodyLarge,
+              textAlign: TextAlign.center,
+            ),
           ],
         ],
       ),
@@ -143,7 +139,7 @@ class _UserProfileScreenState extends State<ProfileScreen> {
           final user = userState.user;
           return Scaffold(
             appBar: AppBar(
-              title: const Text('Profile'),
+              title: const Text('Profil'),
               actions: [
                 if (!_isEditing)
                   IconButton(
@@ -158,10 +154,9 @@ class _UserProfileScreenState extends State<ProfileScreen> {
               ],
             ),
             drawer: const AppNavigationDrawer(),
-            body: Column(
-              children: [
-                _buildProfileHeader(user),
-                const Divider(),
+            body: Column(children: [
+              _buildProfileHeader(user),
+              const Divider(),
               Expanded(
                 child: DefaultTabController(
                   length: 2,
@@ -170,14 +165,18 @@ class _UserProfileScreenState extends State<ProfileScreen> {
                       TabBar(
                         tabs: const [
                           Tab(icon: Icon(Icons.list), text: "Posts"),
-                          Tab(icon: Icon(Icons.thumb_up), text: "Liked Posts"),
+                          Tab(icon: Icon(Icons.thumb_up), text: "Posts likés"),
                         ],
                         indicatorColor: Colors.blue,
                         onTap: (index) {
                           if (index == 0) {
-                            context.read<PostBloc>().add(FetchUserPosts(userId: user.id));
+                            context
+                                .read<PostBloc>()
+                                .add(FetchUserPosts(userId: user.id));
                           } else {
-                            context.read<PostBloc>().add(FetchUserLikes(userId: user.id));
+                            context
+                                .read<PostBloc>()
+                                .add(FetchUserLikes(userId: user.id));
                           }
                         },
                       ),
@@ -188,14 +187,19 @@ class _UserProfileScreenState extends State<ProfileScreen> {
                             BlocBuilder<PostBloc, PostState>(
                               builder: (context, state) {
                                 if (state is PostLoading) {
-                                  return const Center(child: CircularProgressIndicator());
+                                  return const Center(
+                                      child: CircularProgressIndicator());
                                 } else if (state is PostLoaded) {
-                                  final userPosts = state.posts.where((post) => post.parent.isEmpty).toList();
+                                  final userPosts = state.posts
+                                      .where((post) => post.parent.isEmpty)
+                                      .toList();
                                   return _buildPostList(userPosts);
                                 } else if (state is PostError) {
-                                  return Center(child: Text('Error: ${state.message}'));
+                                  return Center(
+                                      child: Text('Error: ${state.message}'));
                                 }
-                                return const Center(child: Text("No posts found."));
+                                return const Center(
+                                    child: Text("Rien à voir ici..."));
                               },
                             ),
 
@@ -203,14 +207,15 @@ class _UserProfileScreenState extends State<ProfileScreen> {
                             BlocBuilder<PostBloc, PostState>(
                               builder: (context, state) {
                                 if (state is PostLoading) {
-                                  return const Center(child: CircularProgressIndicator());
+                                  return const Center(
+                                      child: CircularProgressIndicator());
                                 } else if (state is PostLoaded) {
                                   if (state.posts.isEmpty) {
                                     return const Center(
                                       child: Padding(
                                         padding: EdgeInsets.all(16.0),
                                         child: Text(
-                                          "You haven't liked any posts yet",
+                                          "PAs de posts likés pour l'instant...",
                                           style: TextStyle(fontSize: 16),
                                           textAlign: TextAlign.center,
                                         ),
@@ -226,7 +231,8 @@ class _UserProfileScreenState extends State<ProfileScreen> {
                                     ),
                                   );
                                 }
-                                return const Center(child: Text("Loading liked posts..."));
+                                return const Center(
+                                    child: Text("Chargement..."));
                               },
                             ),
                           ],
@@ -235,7 +241,8 @@ class _UserProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                 ),
-              )]            ),
+              )
+            ]),
           );
         } else if (userState is UserError) {
           return Scaffold(
@@ -243,17 +250,16 @@ class _UserProfileScreenState extends State<ProfileScreen> {
           );
         }
         return const Scaffold(
-          body: Center(child: Text('No profile data available')),
+          body: Center(child: Text('Rien à voir ici...')),
         );
       },
     );
   }
 }
 
-// Méthode pour afficher la liste des posts
 Widget _buildPostList(List<Post> posts) {
   if (posts.isEmpty) {
-    return const Center(child: Text("No posts available."));
+    return const Center(child: Text("Rien à voir ici..."));
   }
 
   return ListView.builder(
@@ -263,7 +269,7 @@ Widget _buildPostList(List<Post> posts) {
       return PostWidget(
         post: post,
         isProfileScreen: false,
-      ); // Réutilisation de PostWidget
+      );
     },
   );
 }

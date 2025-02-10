@@ -59,30 +59,30 @@ class _CommentDialogState extends State<CommentDialog> {
           onPressed: _isSubmitting
               ? null
               : () async {
-            if (_commentController.text.trim().isEmpty) return;
+                  if (_commentController.text.trim().isEmpty) return;
 
-            setState(() => _isSubmitting = true);
+                  setState(() => _isSubmitting = true);
 
-            final imageUrl = _imageUrlController.text.trim();
+                  final imageUrl = _imageUrlController.text.trim();
 
-            context.read<PostBloc>().add(
-              CreateComment(
-                _commentController.text.trim(),
-                widget.post.id,
-                imageUrl: imageUrl.isNotEmpty ? imageUrl : null,
-              ),
-            );
+                  context.read<PostBloc>().add(
+                        CreateComment(
+                          _commentController.text.trim(),
+                          widget.post.id,
+                          imageUrl: imageUrl.isNotEmpty ? imageUrl : null,
+                        ),
+                      );
 
-            context.read<PostBloc>().add(FetchPosts());
+                  context.read<PostBloc>().add(FetchPosts());
 
-            Navigator.pop(context);
-          },
+                  Navigator.pop(context);
+                },
           child: _isSubmitting
               ? const SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
               : const Text('Commenter'),
         ),
       ],

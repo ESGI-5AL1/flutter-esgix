@@ -20,9 +20,6 @@ class FeedScreen extends StatefulWidget {
   State<FeedScreen> createState() => _FeedScreenState();
 }
 
-
-
-
 class _FeedScreenState extends State<FeedScreen> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
@@ -73,16 +70,16 @@ class _FeedScreenState extends State<FeedScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search posts...',
+                hintText: 'Rechercher un post',
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _searchController.clear();
-                    context.read<PostBloc>().add(FetchPosts());
-                  },
-                )
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          context.read<PostBloc>().add(FetchPosts());
+                        },
+                      )
                     : null,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25),
@@ -111,7 +108,7 @@ class _FeedScreenState extends State<FeedScreen> {
                   final posts = state.posts;
                   if (posts.isEmpty) {
                     return const Center(
-                      child: Text('No posts found'),
+                      child: Text('Rien à voir ici..'),
                     );
                   }
                   return RefreshIndicator(

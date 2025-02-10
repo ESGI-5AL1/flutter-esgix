@@ -4,9 +4,6 @@ import '../models/user.dart';
 import '../repositories/posts_repository/posts_repository.dart';
 import '../../profile_screen/profile_post_screen.dart';
 
-
-
-
 class LikesUsersDialog extends StatefulWidget {
   final String postId;
   final PostRepository repository;
@@ -32,15 +29,9 @@ class _LikesUsersDialogState extends State<LikesUsersDialog> {
 
   Future<List<User>> _fetchUsers() async {
     try {
-      // Ajout d'un print pour déboguer
-      print('Fetching users for post: ${widget.postId}');
       final users = await widget.repository.getUsersWhoLikedPost(widget.postId);
-      print('Fetched users: $users');
       return users;
     } catch (e, stackTrace) {
-      // Ajout du print de l'erreur complète et de la stack trace
-      print('Error fetching users: $e');
-      print('Stack trace: $stackTrace');
       throw e;
     }
   }
@@ -146,17 +137,18 @@ class _LikesUsersDialogState extends State<LikesUsersDialog> {
                         title: Text(user.username),
                         subtitle: user.description.isNotEmpty
                             ? Text(
-                          user.description,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        )
+                                user.description,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              )
                             : null,
                         onTap: () {
                           Navigator.pop(context);
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ProfilePostScreen(user: user),
+                              builder: (context) =>
+                                  ProfilePostScreen(user: user),
                             ),
                           );
                         },

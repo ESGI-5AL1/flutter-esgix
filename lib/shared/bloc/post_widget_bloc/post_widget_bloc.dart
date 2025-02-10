@@ -149,7 +149,6 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     try {
       await repository.likePost(event.postId);
 
-      // Mettre à jour tous les posts qui ont le même ID
       final updatedPosts = currentState.posts.map((post) {
         if (post.id == event.postId) {
           return post.copyWith(

@@ -158,8 +158,8 @@ class PostWidget extends StatelessWidget {
                             final user = User(
                               id: post.author.id,
                               username: post.author.username,
-                              email: 'email@example.com',
-                              description: 'User description',
+                              email: '',
+                              description: '',
                               avatar: post.author.avatar,
                             );
                             Navigator.push(

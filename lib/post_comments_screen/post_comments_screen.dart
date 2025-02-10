@@ -33,7 +33,7 @@ class PostCommentsScreenState extends State<PostCommentsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Post and Comments')),
+      appBar: AppBar(title: const Text('Post et commentaires')),
       body: BlocListener<PostBloc, PostState>(
         listener: (context, state) {
           if (state is PostLoaded) {
@@ -47,10 +47,10 @@ class PostCommentsScreenState extends State<PostCommentsScreen> {
         child: BlocBuilder<PostBloc, PostState>(
           builder: (context, state) {
             if (state is PostLoading) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             } else if (state is PostLoaded) {
               final post = state.posts.firstWhere(
-                    (p) => p.id == widget.postId,
+                (p) => p.id == widget.postId,
                 orElse: () => Post(
                   id: '',
                   content: '',
@@ -65,16 +65,16 @@ class PostCommentsScreenState extends State<PostCommentsScreen> {
                 ),
               );
 
-              final comments = state.posts.where((p) => p.parent == widget.postId).toList();
+              final comments =
+                  state.posts.where((p) => p.parent == widget.postId).toList();
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Post parent affiché en haut, ne bouge pas
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: post.id.isEmpty
-                        ? Center(child: Text('Post not found.'))
+                        ? const Center(child: Text('Post indisponible'))
                         : PostWidget(post: post, isProfileScreen: false),
                   ),
 
@@ -83,17 +83,20 @@ class PostCommentsScreenState extends State<PostCommentsScreen> {
                   // Zone scrollable uniquement pour les commentaires
                   Expanded(
                     child: comments.isEmpty
-                        ? Center(child: Text('No comments yet.'))
+                        ? const Center(child: Text('Rien à voir ici...'))
                         : ListView.builder(
-                      itemCount: comments.length,
-                      itemBuilder: (context, index) {
-                        final comment = comments[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(left: 32.0, right: 16.0, bottom: 8.0), // Décalage des commentaires
-                          child: PostWidget(post: comment, isProfileScreen: false),
-                        );
-                      },
-                    ),
+                            itemCount: comments.length,
+                            itemBuilder: (context, index) {
+                              final comment = comments[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 32.0, right: 16.0, bottom: 8.0),
+                                // Décalage des commentaires
+                                child: PostWidget(
+                                    post: comment, isProfileScreen: false),
+                              );
+                            },
+                          ),
                   ),
                 ],
               );

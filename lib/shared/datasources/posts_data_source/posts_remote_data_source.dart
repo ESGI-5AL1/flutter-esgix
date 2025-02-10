@@ -89,7 +89,8 @@ class PostRemoteDataSource implements PostDataSource {
   }
 
   @override
-  Future<Post?> createPost(String content, String? imageUrl, {String? parent}) async {
+  Future<Post?> createPost(String content, String? imageUrl,
+      {String? parent}) async {
     try {
       final Map<String, dynamic> requestBody = {
         'content': content,
@@ -130,7 +131,6 @@ class PostRemoteDataSource implements PostDataSource {
         options: await _getRequestOptions(),
       );
 
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.data is String) {
           return null;
@@ -142,7 +142,6 @@ class PostRemoteDataSource implements PostDataSource {
           return Post.fromJson(responseData['data'] as Map<String, dynamic>);
         }
 
-        print('Unexpected response format');
       }
     } catch (e) {
       print('Error updating post: $e');
@@ -247,11 +246,13 @@ class PostRemoteDataSource implements PostDataSource {
 
       if (response.statusCode == 200) {
         final List usersList = response.data as List;
-        return usersList.map((json) => User.fromJson({
-          ...json as Map<String, dynamic>,
-          'email': '',
-          'description': '',
-        })).toList();
+        return usersList
+            .map((json) => User.fromJson({
+                  ...json as Map<String, dynamic>,
+                  'email': '',
+                  'description': '',
+                }))
+            .toList();
       }
       throw Exception('Failed to fetch users who liked post');
     } catch (e) {

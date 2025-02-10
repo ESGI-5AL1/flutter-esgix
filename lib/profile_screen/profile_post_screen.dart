@@ -19,10 +19,7 @@ class ProfilePostScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => ProfileBloc(
         repository: context.read<PostRepository>(),
-      )..add(LoadProfileData(
-          userId: user.id,
-          loadLikes: false
-      )),
+      )..add(LoadProfileData(userId: user.id, loadLikes: false)),
       child: _ProfilePostScreenContent(user: user),
     );
   }
@@ -45,12 +42,35 @@ class _ProfilePostScreenContent extends StatelessWidget {
             height: MediaQuery.of(context).size.height * 0.25,
             color: Colors.grey[200],
             child: Center(
-              child: CircleAvatar(
-                radius: 50,
-                backgroundImage: user.avatar.isNotEmpty
-                    ? NetworkImage(user.avatar)
-                    : null,
-                child: user.avatar.isEmpty ? const Icon(Icons.person, size: 50) : null,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundImage: user.avatar.isNotEmpty
+                        ? NetworkImage(user.avatar)
+                        : null,
+                    child: user.avatar.isEmpty
+                        ? const Icon(Icons.person, size: 50)
+                        : null,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    user.username,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      user.description,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      textAlign: TextAlign.center,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -63,14 +83,12 @@ class _ProfilePostScreenContent extends StatelessWidget {
                   TabBar(
                     tabs: const [
                       Tab(icon: Icon(Icons.list), text: "Posts"),
-                      Tab(icon: Icon(Icons.thumb_up), text: "Liked Posts"),
+                      Tab(icon: Icon(Icons.thumb_up), text: "Posts likés"),
                     ],
                     indicatorColor: Colors.blue,
                     onTap: (index) {
                       context.read<ProfileBloc>().add(LoadProfileData(
-                          userId: user.id,
-                          loadLikes: index == 1
-                      ));
+                          userId: user.id, loadLikes: index == 1));
                     },
                   ),
                   Expanded(
@@ -79,25 +97,31 @@ class _ProfilePostScreenContent extends StatelessWidget {
                         BlocBuilder<ProfileBloc, ProfileState>(
                           builder: (context, state) {
                             if (state is ProfileLoading) {
-                              return const Center(child: CircularProgressIndicator());
+                              return const Center(
+                                  child: CircularProgressIndicator());
                             } else if (state is ProfileLoaded) {
                               return _buildPostList(state.posts);
                             } else if (state is ProfileError) {
-                              return Center(child: Text('Error: ${state.message}'));
+                              return Center(
+                                  child: Text('Error: ${state.message}'));
                             }
-                            return const Center(child: Text("No posts found."));
+                            return const Center(
+                                child: Text("Rien à voir ici..."));
                           },
                         ),
                         BlocBuilder<ProfileBloc, ProfileState>(
                           builder: (context, state) {
                             if (state is ProfileLoading) {
-                              return const Center(child: CircularProgressIndicator());
+                              return const Center(
+                                  child: CircularProgressIndicator());
                             } else if (state is ProfileLoaded) {
                               return _buildPostList(state.posts);
                             } else if (state is ProfileError) {
-                              return Center(child: Text('Error: ${state.message}'));
+                              return Center(
+                                  child: Text('Error: ${state.message}'));
                             }
-                            return const Center(child: Text("No posts found."));
+                            return const Center(
+                                child: Text("Rien à voir ici..."));
                           },
                         ),
                       ],
@@ -118,7 +142,7 @@ class _ProfilePostScreenContent extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(16.0),
           child: Text(
-            "No posts available.",
+            "Rien à voir ici...",
             style: TextStyle(fontSize: 16),
           ),
         ),
